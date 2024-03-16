@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { DataSource, Repository } from 'typeorm';
 import { UserEntity } from './../user/user.entity';
@@ -8,7 +9,10 @@ import { LoginResponse } from './interfaces';
 @Injectable()
 export class AuthRepository extends Repository<UserEntity> {
 	private logger = new Logger('UserRepository');
-	constructor(private dataSource: DataSource) {
+	constructor(
+		private dataSource: DataSource,
+		private jwtService: JwtService,
+	) {
 		super(UserEntity, dataSource.createEntityManager());
 		this.dataSource = dataSource;
 	}
@@ -54,8 +58,17 @@ export class AuthRepository extends Repository<UserEntity> {
 			this.logger.error('Invalid credentials');
 			throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
 		}
+		const payload = {
+			email: user.email,
+			sub: { id: user.id },
+			isAdmin: user.isAdmin,
+		};
 
-		return { access_token: 'accessToken', refresh_token: 'refresh' };
+		return {
+			user,
+			access_token: this.jwtService.sign(payload),
+			refresh_token: 'refresh',
+		};
 	}
 
 	async validateUser(email: string, pass: string): Promise<UserEntity> {
@@ -76,5 +89,10 @@ export class AuthRepository extends Repository<UserEntity> {
 	async comparePassword(pass: string, hash: string): Promise<boolean> {
 		this.logger.log('comparePassword');
 		return argon.verify(hash, pass);
+	}
+
+	async logout(user: UserEntity): Promise<void> {
+		this.logger.log('logout');
+		this.logger.log(`User ${user.email} has been logged out`);
 	}
 }

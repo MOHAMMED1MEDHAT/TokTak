@@ -1,1 +1,2 @@
-export * from './loginRespons.interface';
+export * from './loginResponse.interface';
+export * from './messageResponse.interface';
