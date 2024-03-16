@@ -1,6 +1,7 @@
 import {
 	Body,
 	Controller,
+	Get,
 	HttpCode,
 	HttpStatus,
 	Post,
@@ -33,7 +34,7 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@UseGuards(JwtAuthGuard)
-	@Post('logout')
+	@Get('logout')
 	async logout(@GetUser() user: UserEntity): Promise<MessageResponse> {
 		return await this.authService.logout(user);
 	}
