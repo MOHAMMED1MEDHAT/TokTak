@@ -81,9 +81,16 @@ export class AuthRepository extends Repository<UserEntity> {
 			isAdmin: user.isAdmin,
 		};
 
+		this.logger.verbose(
+			`Token info: ${process.env.JWT_ACCESS_EXPIRES_IN}, ${process.env.JWT_ACCESS_SECRET}`,
+		);
+
 		return {
 			user,
-			access_token: this.jwtService.sign(payload),
+			access_token: this.jwtService.sign(payload, {
+				expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+				secret: process.env.JWT_ACCESS_SECRET,
+			}),
 			refresh_token: 'refresh',
 		};
 	}
