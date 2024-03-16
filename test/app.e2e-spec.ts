@@ -3,9 +3,10 @@ import { Test } from '@nestjs/testing';
 import * as pactum from 'pactum';
 import { AuthSignupCredentialsDto } from 'src/auth/dtos';
 import { AppModule } from './../src/app.module';
+import { UserEntity } from './../src/user/user.entity';
 
 const validAuthSignupDto: AuthSignupCredentialsDto = {
-	email: 'demo22793@gmail.com',
+	email: 'demo2273@gmail.com',
 	password: '12345678910@Test',
 	confirmPassword: '12345678',
 	firstName: 'demo',
@@ -13,12 +14,16 @@ const validAuthSignupDto: AuthSignupCredentialsDto = {
 };
 
 const invalidAuthSignupDto: AuthSignupCredentialsDto = {
-	email: 'demo22793@gmail.com',
-	password: '12345678',
+	email: 'demo2273@gmail.com',
+	password: '12345678910',
 	confirmPassword: '12345678',
 	firstName: 'demo',
 	lastName: 'demo',
 };
+
+async function clearDB(): Promise<void> {
+	await UserEntity.delete({});
+}
 
 describe('app e2e', () => {
 	let app: INestApplication;
@@ -44,6 +49,7 @@ describe('app e2e', () => {
 	});
 
 	afterAll(async () => {
+		await clearDB();
 		await app.close();
 	});
 
@@ -104,7 +110,9 @@ describe('app e2e', () => {
 					.spec()
 					.post('/auth/signup')
 					.withBody(validAuthSignupDto)
-					.expectStatus(201);
+					.expectBody({
+						message: 'User ',
+					});
 			});
 
 			it('should FAIL signup because of the user already exists', () => {
