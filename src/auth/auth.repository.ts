@@ -5,6 +5,7 @@ import { DataSource, Repository } from 'typeorm';
 import { UserEntity } from './../user/user.entity';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { LoginResponse } from './interfaces';
+import { JwtPayload } from './interfaces/jwtPayload.interface';
 
 @Injectable()
 export class AuthRepository extends Repository<UserEntity> {
@@ -58,9 +59,10 @@ export class AuthRepository extends Repository<UserEntity> {
 			this.logger.error('Invalid credentials');
 			throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
 		}
-		const payload = {
+		const payload: JwtPayload = {
 			email: user.email,
 			sub: { id: user.id },
+			iat: new Date().getTime(),
 			isAdmin: user.isAdmin,
 		};
 
