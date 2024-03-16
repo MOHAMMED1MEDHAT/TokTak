@@ -13,7 +13,7 @@ export class UserRepository extends Repository<UserEntity> {
 	async updateProfileImage(
 		userId: string,
 		profileImage: string,
-	): Promise<UserEntity> {
+	): Promise<void> {
 		this.logger.verbose(`Updating profile image for user with id: ${userId}`);
 	}
 }

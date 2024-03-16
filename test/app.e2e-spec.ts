@@ -36,27 +36,27 @@ describe('app e2e', () => {
 			password: '12345678',
 		};
 
-		describe('POST /auth/register (user)', () => {
-			it('should FAIL to register because of the invalid body', () => {
+		describe('POST /auth/signup (user)', () => {
+			it('should FAIL to signup because of the invalid body', () => {
 				return pactum
 					.spec()
-					.post('/auth/register')
+					.post('/auth/signup')
 					.withBody({ email: userDto.email })
 					.expectStatus(400);
 			});
 
-			it('should register', () => {
+			it('should signup', () => {
 				return pactum
 					.spec()
-					.post('/auth/register')
+					.post('/auth/signup')
 					.withBody(userDto)
 					.expectStatus(201);
 			});
 
-			it('should FAIL register because of the user already exists', () => {
+			it('should FAIL signup because of the user already exists', () => {
 				return pactum
 					.spec()
-					.post('/auth/register')
+					.post('/auth/signup')
 					.withBody(userDto)
 					.expectStatus(400);
 			});

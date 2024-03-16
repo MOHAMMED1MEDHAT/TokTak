@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UserEntity } from 'src/user/user.entity';
+import { UserEntity } from './../user/user.entity';
 import { AuthRepository } from './auth.repository';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { LoginResponse, MessageResponse } from './interfaces';
