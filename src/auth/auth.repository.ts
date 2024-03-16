@@ -22,16 +22,7 @@ export class AuthRepository extends Repository<UserEntity> {
 		authSignupCredentialsDto: AuthSignupCredentialsDto,
 	): Promise<UserEntity> {
 		this.logger.log('signUp');
-		const { email, firstName, lastName, confirmPassword, password } =
-			authSignupCredentialsDto;
-
-		if (password !== confirmPassword) {
-			this.logger.error('Passwords do not match');
-			throw new HttpException(
-				'Passwords do not match',
-				HttpStatus.NOT_ACCEPTABLE,
-			);
-		}
+		const { email, firstName, lastName, password } = authSignupCredentialsDto;
 
 		const user = new UserEntity();
 		user.email = email;

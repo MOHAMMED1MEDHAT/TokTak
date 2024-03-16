@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotAcceptableException } from '@nestjs/common';
 import { UserEntity } from './../user/user.entity';
 import { AuthRepository } from './auth.repository';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
@@ -6,9 +6,15 @@ import { LoginResponse, MessageResponse } from './interfaces';
 
 @Injectable()
 export class AuthService {
+	private logger = new Logger('AuthService');
 	constructor(private authRepository: AuthRepository) {}
 
 	async signUp(authDto: AuthSignupCredentialsDto): Promise<MessageResponse> {
+		const { password, confirmPassword } = authDto;
+		if (password !== confirmPassword) {
+			this.logger.error('Passwords do not match');
+			throw new NotAcceptableException('Passwords do not match');
+		}
 		const user = await this.authRepository.signUp(authDto);
 		return { message: `User ${user.email} has been created` };
 	}
