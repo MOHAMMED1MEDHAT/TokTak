@@ -112,7 +112,11 @@ describe('app e2e', () => {
 					.spec()
 					.post('/auth/signup')
 					.withBody(validAuthSignupDto)
-					.expectStatus(400);
+					.expectBody({
+						error: 'Conflict',
+						message: 'User already exists',
+						statusCode: 409,
+					});
 			});
 		});
 

@@ -3,10 +3,12 @@ import {
 	Column,
 	CreateDateColumn,
 	DeleteDateColumn,
+	Entity,
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
 
+@Entity('users')
 export class UserEntity extends BaseEntity {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
@@ -23,47 +25,84 @@ export class UserEntity extends BaseEntity {
 	@Column()
 	password: string;
 
-	@Column()
+	@Column({
+		nullable: true,
+	})
 	photo: string;
 
-	@Column()
+	@Column({
+		type: 'simple-enum',
+		enum: ['female', 'male', 'other'],
+		nullable: true,
+	})
 	gender: string;
 
-	@Column()
+	@Column({
+		type: 'date',
+		nullable: true,
+	})
 	dateOfBirth: Date;
 
-	@Column()
+	@Column({
+		type: 'simple-array',
+		default: [],
+	})
 	following: string[];
 
-	@Column()
+	@Column({
+		type: 'simple-array',
+		default: [],
+	})
 	followers: string[];
 
-	@Column()
+	@Column({
+		type: 'integer',
+		default: 0,
+	})
 	numOfFollowers: number;
 
-	@Column()
+	@Column({
+		type: 'simple-array',
+		default: [],
+	})
 	subscriptions: string[];
 
-	@Column()
+	@Column({
+		type: 'integer',
+		default: 0,
+	})
 	numOfFollowing: number;
 
-	@Column()
+	@Column({
+		type: 'simple-array',
+		default: [],
+	})
 	posts: string[];
 
-	@Column()
+	@Column({
+		type: 'simple-array',
+		default: [],
+	})
 	likedPosts: string[];
 
-	@Column()
+	@Column({
+		type: 'simple-array',
+		default: [],
+	})
 	savedPosts: string[];
 
-	@Column()
+	@Column({
+		type: 'integer',
+		default: 0,
+	})
 	numOfPosts: number;
 
-	@Column()
+	@Column({ nullable: true })
 	bio: string;
 
 	@Column({
 		type: 'simple-array',
+		default: [],
 	})
 	preferredCategories: string[];
 
@@ -79,19 +118,24 @@ export class UserEntity extends BaseEntity {
 	@Column({ default: false })
 	isAdmin: boolean;
 
-	@Column()
+	@Column({
+		nullable: true,
+	})
 	passwordResetToken: string;
 
-	@Column()
+	@Column({
+		type: 'date',
+		nullable: true,
+	})
 	passwordResetTokenExpires: Date;
 
-	@Column()
+	@Column({ type: 'date', nullable: true })
 	passwordChangedAt: Date;
 
-	@Column()
+	@Column({ nullable: true })
 	emailConfirmationToken: string;
 
-	@Column()
+	@Column({ type: 'date', nullable: true })
 	emailConfirmationTokenExpires: Date;
 
 	@Column({ default: false })

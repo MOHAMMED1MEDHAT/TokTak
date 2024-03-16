@@ -1,4 +1,10 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+	HttpException,
+	HttpStatus,
+	Injectable,
+	InternalServerErrorException,
+	Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { DataSource, Repository } from 'typeorm';
@@ -22,7 +28,16 @@ export class AuthRepository extends Repository<UserEntity> {
 		authSignupCredentialsDto: AuthSignupCredentialsDto,
 	): Promise<UserEntity> {
 		this.logger.log('signUp');
-		const { email, firstName, lastName, password } = authSignupCredentialsDto;
+		const { email, firstName, lastName, confirmPassword, password } =
+			authSignupCredentialsDto;
+
+		if (password !== confirmPassword) {
+			this.logger.error('Passwords do not match');
+			throw new HttpException(
+				'Passwords do not match',
+				HttpStatus.NOT_ACCEPTABLE,
+			);
+		}
 
 		const user = new UserEntity();
 		user.email = email;
@@ -34,6 +49,15 @@ export class AuthRepository extends Repository<UserEntity> {
 			await user.save();
 		} catch (error) {
 			this.logger.error(`Failed to save user: ${error}`);
+			switch (error.name) {
+				case 'QueryFailedError':
+					throw new HttpException(
+						'User with this email already exists',
+						HttpStatus.CONFLICT,
+					);
+				default:
+					throw new InternalServerErrorException('Failed to save user');
+			}
 		}
 
 		return user;
