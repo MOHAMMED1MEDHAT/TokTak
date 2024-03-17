@@ -83,11 +83,14 @@ export class AuthRepository extends Repository<UserEntity> {
 
 		return {
 			user,
-			access_token: this.jwtService.sign(payload, {
+			accessToken: this.jwtService.sign(payload, {
 				expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
 				secret: process.env.JWT_ACCESS_SECRET,
 			}),
-			refresh_token: 'refresh',
+			refreshToken: this.jwtService.sign(payload, {
+				expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+				secret: process.env.JWT_REFRESH_SECRET,
+			}),
 		};
 	}
 
