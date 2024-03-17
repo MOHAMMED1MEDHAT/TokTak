@@ -8,7 +8,7 @@ import { UserEntity } from './../src/user/user.entity';
 const validAuthSignupDto: AuthSignupCredentialsDto = {
 	email: 'demo2273@gmail.com',
 	password: '12345678910@Test',
-	confirmPassword: '12345678',
+	confirmPassword: '12345678910@Test',
 	firstName: 'demo',
 	lastName: 'demo',
 };
@@ -77,12 +77,7 @@ describe('app e2e', () => {
 					})
 					.expectBody({
 						error: 'Bad Request',
-						message: [
-							'Password too weak',
-							'Password is too short. Minimal length is 10 characters, but actual is 12345678',
-							'Password too weak',
-							'Password is too short. Minimal length is 10 characters, but actual is 12345678',
-						],
+						message: ['Password too weak'],
 						statusCode: 400,
 					});
 			});
@@ -111,8 +106,9 @@ describe('app e2e', () => {
 					.post('/auth/signup')
 					.withBody(validAuthSignupDto)
 					.expectBody({
-						message: 'User ',
-					});
+						message: `User ${validAuthSignupDto.email} has been created`,
+					})
+					.expectStatus(201);
 			});
 
 			it('should FAIL signup because of the user already exists', () => {
@@ -145,14 +141,9 @@ describe('app e2e', () => {
 					.post('/auth/login')
 					.withBody({
 						email: validAuthSignupDto.email,
-						password: '12345',
+						password: '12345678910@Test2',
 					})
-					.expectBody({
-						message: 'Invalid Credentials',
-						error: 'Bad Request',
-						statusCode: 400,
-					})
-					.expectStatus(400);
+					.expectBody({ message: 'Invalid credentials', statusCode: 401 });
 			});
 			it('should login', () => {
 				return pactum
@@ -160,8 +151,9 @@ describe('app e2e', () => {
 					.post('/auth/login')
 					.withBody(validAuthSignupDto)
 					.expectStatus(200)
-					.stores('userAt', 'data.token')
-					.stores('userId', 'data.user.id');
+					.stores('userAt', 'data.access_token')
+					.stores('userRt', 'data.refresh_token')
+					.stores('userId', 'data.sub.id');
 			});
 		});
 
@@ -170,7 +162,7 @@ describe('app e2e', () => {
 				return pactum
 					.spec()
 					.post('/auth/logout')
-					.withBearerToken('$S{userAt}')
+					.withBearerToken('$S{userAt} $S{userRt}')
 					.expectStatus(200);
 			});
 
