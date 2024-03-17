@@ -4,7 +4,9 @@ import {
 	Get,
 	HttpCode,
 	HttpStatus,
+	Logger,
 	Post,
+	Req,
 	UseGuards,
 } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
@@ -17,6 +19,8 @@ import { RefreshTokenResponse } from './interfaces/refreshTokenResponse.interfac
 
 @Controller('auth')
 export class AuthController {
+	private logger = new Logger('AuthController');
+
 	constructor(private authService: AuthService) {}
 
 	@HttpCode(HttpStatus.CREATED)
@@ -35,17 +39,18 @@ export class AuthController {
 		return await this.authService.login(authDto);
 	}
 
-	@HttpCode(HttpStatus.OK)
-	@Post('refresh')
+	@HttpCode(HttpStatus.CREATED)
+	@Get('refresh')
 	@UseGuards(RefreshJwtAuthGuard)
-	async refresh(@GetUser() uesr: UserEntity): Promise<RefreshTokenResponse> {
-		return await this.authService.refresh(uesr.id);
+	async refresh(@GetUser() user: UserEntity): Promise<RefreshTokenResponse> {
+		return await this.authService.refresh(user.id);
 	}
 
 	@HttpCode(HttpStatus.OK)
 	@UseGuards(JwtAuthGuard)
 	@Get('logout')
-	async logout(@GetUser() user: UserEntity): Promise<MessageResponse> {
-		return await this.authService.logout(user);
+	async logout(@Req() req): Promise<void> {
+		this.logger.verbose(req);
+		// return await this.authService.logout(user);
 	}
 }

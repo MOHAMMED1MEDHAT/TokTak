@@ -12,13 +12,17 @@ import * as argon from 'argon2';
 import { DataSource, Repository } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from '../dtos';
+import { AuthSessionAttribute } from '../enums/authSessionAttribute.enum';
+import { TokenType } from '../enums/tokenType.enum';
 import { LoginResponse } from '../interfaces';
 import { JwtPayload } from '../interfaces/jwtPayload.interface';
+import { AuthSessionRepository } from './authSession.repository';
 
 @Injectable()
 export class AuthRepository extends Repository<UserEntity> {
 	private logger = new Logger('AuthRepository');
 	constructor(
+		private authSessionRepository: AuthSessionRepository,
 		private dataSource: DataSource,
 		private jwtService: JwtService,
 	) {
@@ -64,21 +68,42 @@ export class AuthRepository extends Repository<UserEntity> {
 		authLoginCredentials: AuthLoginCredentialsDto,
 	): Promise<LoginResponse> {
 		this.logger.log('login');
-		const { email, password } = authLoginCredentials;
-		const user = await this.validateUser(email, password);
-		if (!user) {
-			this.logger.error('Invalid credentials');
-			throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
-		}
-
 		this.logger.verbose(
 			`Token info: ${process.env.JWT_ACCESS_EXPIRES_IN}, ${process.env.JWT_ACCESS_SECRET}`,
 		);
 
+		const { email, password } = authLoginCredentials;
+		//1) check if user exists
+		const user = await this.validateUser(email, password);
+
+		if (!user) {
+			this.logger.error('Invalid credentials');
+			throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+		}
+		//2) create an authSession for user
+		const session = await this.authSessionRepository.createSession(user.id);
+		//3) create authentication tokens for user
+		const accessToken = await this.generateToken(
+			user.id,
+			session.id,
+			TokenType.ACCESS_TOKEN,
+		);
+		const refreshToken = await this.generateToken(
+			user.id,
+			session.id,
+			TokenType.REFRESH_TOKEN,
+		);
+		//4) add the refreshToken to the authSession
+		await this.authSessionRepository.addAttribute(
+			session.id,
+			AuthSessionAttribute.REFRESH_TOKEN,
+			refreshToken,
+		);
+
 		return {
 			user,
-			accessToken: await this.generateAccessToken(user.id),
-			refreshToken: await this.generateRefreshToken(user.id),
+			accessToken,
+			refreshToken,
 		};
 	}
 
@@ -92,37 +117,35 @@ export class AuthRepository extends Repository<UserEntity> {
 		return null;
 	}
 
-	async generateAccessToken(userId: string): Promise<string> {
+	async generateToken(
+		userId: string,
+		sessionId: string,
+		tokenType: TokenType,
+	): Promise<string> {
 		this.logger.log('generateAccessToken');
 		const user = await this.findOne({ where: { id: userId } });
 
-		const payload: JwtPayload = {
-			email: user.email,
-			sub: { id: user.id },
-			iat: new Date().getTime(),
-			isAdmin: user.isAdmin,
-		};
-
-		return this.jwtService.sign(payload, {
-			expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
-			secret: process.env.JWT_ACCESS_SECRET,
-		});
-	}
-
-	async generateRefreshToken(userId: string): Promise<string> {
-		this.logger.log('generateAccessToken');
-		const user = await this.findOne({ where: { id: userId } });
+		if (tokenType == TokenType.PASSWORD_RESET_TOKEN) {
+			//TODO: handle reset password use case
+		}
 
 		const payload: JwtPayload = {
 			email: user.email,
-			sub: { id: user.id },
+			sub: user.id,
 			iat: new Date().getTime(),
 			isAdmin: user.isAdmin,
+			authSessionId: sessionId,
 		};
 
 		return this.jwtService.sign(payload, {
-			expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-			secret: process.env.JWT_REFRESH_SECRET,
+			expiresIn:
+				tokenType == TokenType.ACCESS_TOKEN
+					? process.env.JWT_ACCESS_EXPIRES_IN
+					: process.env.JWT_REFRESH_EXPIRES_IN,
+			secret:
+				tokenType == TokenType.ACCESS_TOKEN
+					? process.env.JWT_ACCESS_SECRET
+					: process.env.JWT_REFRESH_SECRET,
 		});
 	}
 
@@ -138,6 +161,7 @@ export class AuthRepository extends Repository<UserEntity> {
 
 	async logout(user: UserEntity): Promise<void> {
 		this.logger.log('logout');
+		// await this.authSessionRepository.invalidateSession();
 		this.logger.log(`User ${user.email} has been logged out`);
 	}
 }

@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from 'src/user/entities/user.entity';
+import { UserEntity } from 'src/user/entities';
+import { JwtPayload } from '../interfaces/jwtPayload.interface';
 import { AuthRepository } from '../repositories/auth.repository';
 
 @Injectable()
@@ -18,10 +19,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 		});
 	}
 
-	async validate(payload: { sub: string; email: string }): Promise<UserEntity> {
+	async validate(
+		payload: JwtPayload,
+	): Promise<{ user: UserEntity; isAdmin: boolean; authSessionId: string }> {
+		const { email, authSessionId, isAdmin } = payload;
 		const user = await this.authRepository.findOne({
 			where: {
-				email: payload.email,
+				email,
 			},
 		});
 
@@ -31,6 +35,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 		delete user.password;
 
-		return user;
+		return {
+			user,
+			isAdmin,
+			authSessionId,
+		};
 	}
 }

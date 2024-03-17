@@ -20,23 +20,16 @@ export class AuthSessionEntity extends BaseEntity {
 	@Column()
 	refreshToken: string;
 
-	@Column({
-		type: 'simple-array',
-		default: [],
-	})
-	rtcSockets: string[];
+	@Column({ nullable: true })
+	rtcSocket: string;
 
 	@Column({
-		type: 'simple-array',
-		default: [],
+		nullable: true,
 	})
-	notificationsSockets: string[];
+	notificationsSocket: string;
 
-	@Column({
-		type: 'simple-array',
-		default: [],
-	})
-	chatSockets: string[];
+	@Column({ nullable: true })
+	chatSocket: string;
 
 	@Column({
 		type: 'enum',

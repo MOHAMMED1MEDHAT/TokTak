@@ -32,7 +32,7 @@ export class AuthService {
 
 	async logout(user: UserEntity): Promise<MessageResponse> {
 		this.authRepository.logout(user);
-		this.authSessionRepository.invalidateSession(user.id);
+		this.authSessionRepository.invalidateSession(user);
 		return { message: 'User has been logged out' };
 	}
 }
