@@ -13,10 +13,13 @@ import { GetUser } from './decorators';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { JwtAuthGuard } from './guards';
 import { LoginResponse, MessageResponse } from './interfaces';
+import { RefreshTokenResponse } from './interfaces/refreshTokenResponse.interface';
 
 @Controller('auth')
 export class AuthController {
 	constructor(private authService: AuthService) {}
+
+	@HttpCode(HttpStatus.CREATED)
 	@Post('signup')
 	async signup(
 		@Body() authDto: AuthSignupCredentialsDto,
@@ -30,6 +33,15 @@ export class AuthController {
 		@Body() authDto: AuthLoginCredentialsDto,
 	): Promise<LoginResponse> {
 		return await this.authService.login(authDto);
+	}
+
+	@HttpCode(HttpStatus.OK)
+	@Post('refresh')
+	@UseGuards()
+	async refresh(
+		@Body('refreshToken') refreshToken: string,
+	): Promise<RefreshTokenResponse> {
+		return await this.authService.refreshToken(refreshToken);
 	}
 
 	@HttpCode(HttpStatus.OK)

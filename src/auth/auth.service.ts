@@ -3,6 +3,7 @@ import { UserEntity } from './../user/user.entity';
 import { AuthRepository } from './auth.repository';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { LoginResponse, MessageResponse } from './interfaces';
+import { RefreshTokenResponse } from './interfaces/refreshTokenResponse.interface';
 
 @Injectable()
 export class AuthService {
@@ -17,6 +18,8 @@ export class AuthService {
 	async login(authDto: AuthLoginCredentialsDto): Promise<LoginResponse> {
 		return await this.authRepository.login(authDto);
 	}
+
+	async refreshToken(refreshToken: string): Promise<RefreshTokenResponse> {}
 
 	async logout(user: UserEntity): Promise<MessageResponse> {
 		this.authRepository.logout(user);

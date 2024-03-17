@@ -7,8 +7,10 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
+import { UserRole } from './enums';
+import { Gender } from './enums/gender.enum';
 
-@Entity('users')
+@Entity('user')
 export class UserEntity extends BaseEntity {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
@@ -31,11 +33,11 @@ export class UserEntity extends BaseEntity {
 	photo: string;
 
 	@Column({
-		type: 'simple-enum',
-		enum: ['female', 'male', 'other'],
+		type: 'enum',
+		enum: Gender,
 		nullable: true,
 	})
-	gender: string;
+	gender: Gender;
 
 	@Column({
 		type: 'date',
@@ -109,8 +111,8 @@ export class UserEntity extends BaseEntity {
 	@Column({ default: 'en' })
 	language: string;
 
-	@Column({ default: 'user', enum: ['gest', 'user', 'admin'] })
-	role: string;
+	@Column({ type: 'enum', enum: UserRole, default: UserRole.GEST })
+	role: UserRole;
 
 	@Column({ default: true })
 	isActive: boolean;
