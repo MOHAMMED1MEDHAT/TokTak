@@ -149,6 +149,10 @@ export class AuthRepository extends Repository<UserEntity> {
 		});
 	}
 
+	async getPayload(token: string): Promise<JwtPayload> {
+		return await this.jwtService.decode(token);
+	}
+
 	async hashPassword(password: string): Promise<string> {
 		this.logger.log('hashPassword');
 		return argon.hash(password);

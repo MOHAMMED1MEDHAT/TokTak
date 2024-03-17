@@ -19,10 +19,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 		});
 	}
 
-	async validate(
-		payload: JwtPayload,
-	): Promise<{ user: UserEntity; isAdmin: boolean; authSessionId: string }> {
-		const { email, authSessionId, isAdmin } = payload;
+	async validate(payload: JwtPayload): Promise<UserEntity> {
+		const { email } = payload;
 		const user = await this.authRepository.findOne({
 			where: {
 				email,
@@ -35,10 +33,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
 		delete user.password;
 
-		return {
-			user,
-			isAdmin,
-			authSessionId,
-		};
+		return user;
 	}
 }
