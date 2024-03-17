@@ -7,6 +7,7 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
+import { AuthSessionStatus } from '../enums/authSessionType.enum';
 
 @Entity('authSession')
 export class AuthSessionEntity extends BaseEntity {
@@ -15,6 +16,9 @@ export class AuthSessionEntity extends BaseEntity {
 
 	@Column()
 	userId: string;
+
+	@Column()
+	refreshToken: string;
 
 	@Column({
 		type: 'simple-array',
@@ -35,11 +39,11 @@ export class AuthSessionEntity extends BaseEntity {
 	chatSockets: string[];
 
 	@Column({
-		type: 'simple-enum',
-		enum: ['valid', 'expired'],
-		default: 'valid',
+		type: 'enum',
+		enum: AuthSessionStatus,
+		default: AuthSessionStatus.VALID,
 	})
-	status: string;
+	status: AuthSessionStatus;
 
 	@CreateDateColumn()
 	createdAt: Date;

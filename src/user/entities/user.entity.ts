@@ -7,8 +7,8 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 } from 'typeorm';
-import { UserRole } from './enums';
-import { Gender } from './enums/gender.enum';
+import { UserRole } from '../enums';
+import { Gender } from '../enums/gender.enum';
 
 @Entity('user')
 export class UserEntity extends BaseEntity {

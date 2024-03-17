@@ -2,8 +2,8 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as pactum from 'pactum';
 import { AuthSignupCredentialsDto } from 'src/auth/dtos';
+import { UserEntity } from '../src/user/entities/user.entity';
 import { AppModule } from './../src/app.module';
-import { UserEntity } from './../src/user/user.entity';
 
 const validAuthSignupDto: AuthSignupCredentialsDto = {
 	email: 'demo2273@gmail.com',

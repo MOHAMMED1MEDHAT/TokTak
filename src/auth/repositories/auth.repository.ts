@@ -10,14 +10,14 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { DataSource, Repository } from 'typeorm';
-import { UserEntity } from './../user/user.entity';
-import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
-import { LoginResponse } from './interfaces';
-import { JwtPayload } from './interfaces/jwtPayload.interface';
+import { UserEntity } from '../../user/entities/user.entity';
+import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from '../dtos';
+import { LoginResponse } from '../interfaces';
+import { JwtPayload } from '../interfaces/jwtPayload.interface';
 
 @Injectable()
 export class AuthRepository extends Repository<UserEntity> {
-	private logger = new Logger('UserRepository');
+	private logger = new Logger('AuthRepository');
 	constructor(
 		private dataSource: DataSource,
 		private jwtService: JwtService,
@@ -70,12 +70,6 @@ export class AuthRepository extends Repository<UserEntity> {
 			this.logger.error('Invalid credentials');
 			throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
 		}
-		const payload: JwtPayload = {
-			email: user.email,
-			sub: { id: user.id },
-			iat: new Date().getTime(),
-			isAdmin: user.isAdmin,
-		};
 
 		this.logger.verbose(
 			`Token info: ${process.env.JWT_ACCESS_EXPIRES_IN}, ${process.env.JWT_ACCESS_SECRET}`,
@@ -83,14 +77,8 @@ export class AuthRepository extends Repository<UserEntity> {
 
 		return {
 			user,
-			accessToken: this.jwtService.sign(payload, {
-				expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
-				secret: process.env.JWT_ACCESS_SECRET,
-			}),
-			refreshToken: this.jwtService.sign(payload, {
-				expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
-				secret: process.env.JWT_REFRESH_SECRET,
-			}),
+			accessToken: await this.generateAccessToken(user.id),
+			refreshToken: await this.generateRefreshToken(user.id),
 		};
 	}
 
@@ -102,6 +90,40 @@ export class AuthRepository extends Repository<UserEntity> {
 		}
 
 		return null;
+	}
+
+	async generateAccessToken(userId: string): Promise<string> {
+		this.logger.log('generateAccessToken');
+		const user = await this.findOne({ where: { id: userId } });
+
+		const payload: JwtPayload = {
+			email: user.email,
+			sub: { id: user.id },
+			iat: new Date().getTime(),
+			isAdmin: user.isAdmin,
+		};
+
+		return this.jwtService.sign(payload, {
+			expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+			secret: process.env.JWT_ACCESS_SECRET,
+		});
+	}
+
+	async generateRefreshToken(userId: string): Promise<string> {
+		this.logger.log('generateAccessToken');
+		const user = await this.findOne({ where: { id: userId } });
+
+		const payload: JwtPayload = {
+			email: user.email,
+			sub: { id: user.id },
+			iat: new Date().getTime(),
+			isAdmin: user.isAdmin,
+		};
+
+		return this.jwtService.sign(payload, {
+			expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+			secret: process.env.JWT_REFRESH_SECRET,
+		});
 	}
 
 	async hashPassword(password: string): Promise<string> {

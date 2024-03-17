@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from 'src/user/user.entity';
-import { AuthRepository } from '../auth.repository';
+import { UserEntity } from 'src/user/entities/user.entity';
+import { AuthRepository } from '../repositories/auth.repository';
 
 @Injectable()
 export class RefreshJwtStrategy extends PassportStrategy(
@@ -15,7 +15,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
 		private authRepository: AuthRepository,
 	) {
 		super({
-			jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
+			jwtFromRequest: ExtractJwt.fromHeader('refreshToken'),
 			ignoreExpiration: false,
 			secretOrKey: `${process.env.JWT_REFRESH_SECRET}`,
 		});
