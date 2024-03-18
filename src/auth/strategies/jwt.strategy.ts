@@ -29,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 			return null;
 		}
 
-		delete user.password;
+		delete user.passwordHash;
 
 		const data = {
 			user,

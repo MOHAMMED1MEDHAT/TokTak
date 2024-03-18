@@ -25,7 +25,7 @@ export class UserEntity extends BaseEntity {
 	email: string;
 
 	@Column()
-	password: string;
+	passwordHash: string;
 
 	@Column({
 		nullable: true,
@@ -122,14 +122,15 @@ export class UserEntity extends BaseEntity {
 
 	@Column({
 		nullable: true,
+		length: 6,
 	})
-	passwordResetToken: string;
+	passwordResetCode: string;
 
 	@Column({
 		type: 'date',
 		nullable: true,
 	})
-	passwordResetTokenExpires: Date;
+	passwordResetCodeExpires: Date;
 
 	@Column({ type: 'date', nullable: true })
 	passwordChangedAt: Date;

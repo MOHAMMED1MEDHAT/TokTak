@@ -32,7 +32,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
 			return null;
 		}
 
-		delete user.password;
+		delete user.passwordHash;
 
 		const data = {
 			user,

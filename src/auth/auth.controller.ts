@@ -8,11 +8,11 @@ import {
 	Post,
 	UseGuards,
 } from '@nestjs/common';
-import { UserEntity } from '../user/entities/user.entity';
+import { UserEntity } from '../user/entities';
 import { AuthService } from './auth.service';
 import { GetPayload, GetUser } from './decorators';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
-import { JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
+import { GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
 import {
 	JwtPayload,
 	LoginResponse,
@@ -25,6 +25,18 @@ export class AuthController {
 	private logger = new Logger('AuthController');
 
 	constructor(private authService: AuthService) {}
+
+	@Get('google')
+	@UseGuards(GoogleOauthGuard)
+	async googleAuth(@GetUser() user: UserEntity): Promise<void> {
+		this.logger.debug(user);
+	}
+
+	@Get('google/callback')
+	@UseGuards(GoogleOauthGuard)
+	async googleAuthCallback(@GetUser() user: any): Promise<void> {
+		this.logger.debug(user);
+	}
 
 	@HttpCode(HttpStatus.CREATED)
 	@Post('signup')
