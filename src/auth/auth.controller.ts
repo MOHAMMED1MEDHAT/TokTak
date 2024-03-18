@@ -6,16 +6,19 @@ import {
 	HttpStatus,
 	Logger,
 	Post,
-	Req,
 	UseGuards,
 } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthService } from './auth.service';
-import { GetUser } from './decorators';
+import { GetPayload, GetUser } from './decorators';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
-import { LoginResponse, MessageResponse } from './interfaces';
-import { RefreshTokenResponse } from './interfaces/refreshTokenResponse.interface';
+import {
+	JwtPayload,
+	LoginResponse,
+	MessageResponse,
+	RefreshTokenResponse,
+} from './interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -49,8 +52,12 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	@UseGuards(JwtAuthGuard)
 	@Get('logout')
-	async logout(@Req() req): Promise<void> {
-		this.logger.verbose(req);
-		// return await this.authService.logout(user);
+	async logout(
+		@GetUser() user: UserEntity,
+		@GetPayload() payload: JwtPayload,
+	): Promise<MessageResponse> {
+		// this.logger.verbose(user.id);
+		// this.logger.verbose(req.headers);
+		return await this.authService.logout(user, payload);
 	}
 }

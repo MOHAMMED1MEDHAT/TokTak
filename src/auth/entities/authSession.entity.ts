@@ -17,7 +17,9 @@ export class AuthSessionEntity extends BaseEntity {
 	@Column()
 	userId: string;
 
-	@Column()
+	@Column({
+		nullable: true,
+	})
 	refreshToken: string;
 
 	@Column({ nullable: true })

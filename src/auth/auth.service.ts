@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { TokenType } from './enums/tokenType.enum';
-import { LoginResponse, MessageResponse } from './interfaces';
+import { JwtPayload, LoginResponse, MessageResponse } from './interfaces';
 import { RefreshTokenResponse } from './interfaces/refreshTokenResponse.interface';
 import { AuthRepository, AuthSessionRepository } from './repositories';
 
@@ -31,6 +31,10 @@ export class AuthService {
 		const refreshTokenPayload =
 			await this.authRepository.getPayload(refreshToken);
 
+		this.logger.verbose(
+			`AuthService refreshTokenPayload ${refreshTokenPayload}`,
+		);
+
 		const accessToken = await this.authRepository.generateToken(
 			userId,
 			(
@@ -47,8 +51,11 @@ export class AuthService {
 		};
 	}
 
-	async logout(user: UserEntity): Promise<MessageResponse> {
-		this.authRepository.logout(user);
+	async logout(
+		user: UserEntity,
+		payload: JwtPayload,
+	): Promise<MessageResponse> {
+		this.authRepository.logout(user, payload);
 		return { message: 'User has been logged out' };
 	}
 }

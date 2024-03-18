@@ -1,7 +1,8 @@
 export interface JwtPayload {
 	email: string;
-	sub: string;
-	iat: number;
+	sub: {
+		id: string;
+	};
 	isAdmin: boolean;
 	authSessionId: string;
 }

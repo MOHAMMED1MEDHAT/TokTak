@@ -131,8 +131,7 @@ export class AuthRepository extends Repository<UserEntity> {
 
 		const payload: JwtPayload = {
 			email: user.email,
-			sub: user.id,
-			iat: new Date().getTime(),
+			sub: { id: user.id },
 			isAdmin: user.isAdmin,
 			authSessionId: sessionId,
 		};
@@ -163,9 +162,9 @@ export class AuthRepository extends Repository<UserEntity> {
 		return argon.verify(hash, pass);
 	}
 
-	async logout(user: UserEntity): Promise<void> {
+	async logout(user: UserEntity, payload: JwtPayload): Promise<void> {
 		this.logger.log('logout');
-		// await this.authSessionRepository.invalidateSession();
+		await this.authSessionRepository.invalidateSession(payload.authSessionId);
 		this.logger.log(`User ${user.email} has been logged out`);
 	}
 }
