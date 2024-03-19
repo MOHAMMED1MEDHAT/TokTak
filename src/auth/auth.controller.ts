@@ -12,7 +12,7 @@ import {
 import { UserEntity } from '../user/entities';
 import { AuthService } from './auth.service';
 import { GetPayload, GetUser } from './decorators';
-import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationCodeDto } from './dtos';
+import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationAuthCodeDto } from './dtos';
 import { GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
 import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
 
@@ -28,11 +28,11 @@ export class AuthController {
 		this.logger.debug(user);
 	}
 
-	@Get('google/callback')
-	@UseGuards(GoogleOauthGuard)
-	async googleAuthCallback(@GetUser() user: any): Promise<void> {
-		this.logger.debug(user);
-	}
+	// @Get('google/callback')
+	// @UseGuards(GoogleOauthGuard)
+	// async googleAuthCallback(@GetUser() user: any): Promise<void> {
+	// 	this.logger.debug(user);
+	// }
 
 	@HttpCode(HttpStatus.CREATED)
 	@Post('signup')
@@ -42,8 +42,8 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('verify')
-	async verify(@Body() verificationCodeDto: VerificationCodeDto): Promise<MessageResponse> {
-		return await this.authService.verifyUserEmail(verificationCodeDto);
+	async verify(@Body() verificationAuthCodeDto: VerificationAuthCodeDto): Promise<MessageResponse> {
+		return await this.authService.verifyUserEmail(verificationAuthCodeDto);
 	}
 
 	@HttpCode(HttpStatus.OK)

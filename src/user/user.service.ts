@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { MessageResponse } from 'src/auth/interfaces';
 import { EmailType } from 'src/mail/enums';
 import { MailService } from 'src/mail/mail.service';
+import { EmaiLDto } from './dtos';
+import { VerificationCodeDto } from './dtos/verification.dto';
 import { UserEntity } from './entities';
 import { UserRepository } from './repositories';
 
@@ -21,7 +23,11 @@ export class UserService {
 		return { message: `we sent you a confirmation code in your email:${user.email}` };
 	}
 
-	async verifyEmailUpdateCode(code: string, user: UserEntity): Promise<MessageResponse> {
+	async verifyEmailUpdateCode(
+		verificationCodeDto: VerificationCodeDto,
+		user: UserEntity,
+	): Promise<MessageResponse> {
+		const { code } = verificationCodeDto;
 		const result = await this.userRepository.verifyEmailCode(code, user.id);
 		if (!result) {
 			return { message: 'Invalid code' };
@@ -29,7 +35,8 @@ export class UserService {
 		return { message: 'Email updated successfully' };
 	}
 
-	async updateEmail(email: string, user: UserEntity): Promise<UserEntity> {
+	async updateEmail(emailDto: EmaiLDto, user: UserEntity): Promise<UserEntity> {
+		const { email } = emailDto;
 		return this.userRepository.updateEmail(email, user.id);
 	}
 

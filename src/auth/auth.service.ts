@@ -11,7 +11,7 @@ import { EmailType } from 'src/mail/enums';
 import { MailService } from 'src/mail/mail.service';
 import { UserRepository } from 'src/user/repositories';
 import { UserEntity } from '../user/entities/user.entity';
-import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationCodeDto } from './dtos';
+import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationAuthCodeDto } from './dtos';
 import { AuthSessionAttribute } from './enums';
 import { TokenType } from './enums/tokenType.enum';
 import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
@@ -131,7 +131,7 @@ export class AuthService {
 		return { message: 'User logged out successfully' };
 	}
 
-	async verifyUserEmail(verificationCodeDto: VerificationCodeDto): Promise<MessageResponse> {
+	async verifyUserEmail(verificationCodeDto: VerificationAuthCodeDto): Promise<MessageResponse> {
 		const { code, email } = verificationCodeDto;
 		const userId = (await this.userRepository.getUserByEmail(email)).id;
 		const user = await this.userRepository.verifyEmailCode(code, userId);
