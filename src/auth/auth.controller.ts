@@ -5,14 +5,15 @@ import {
 	HttpCode,
 	HttpStatus,
 	Logger,
-	NotImplementedException,
 	Post,
 	UseGuards,
 } from '@nestjs/common';
+import { EmaiLDto } from 'src/user/dtos';
 import { UserEntity } from '../user/entities';
 import { AuthService } from './auth.service';
 import { GetPayload, GetUser } from './decorators';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationAuthCodeDto } from './dtos';
+import { PasswordResetDto } from './dtos/passwordReset.dto';
 import { GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
 import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
 
@@ -73,19 +74,21 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.OK)
 	@Post('forgotPassword')
-	async forgotPassword(): Promise<void> {
-		throw new NotImplementedException();
+	async forgotPassword(@Body() emailDto: EmaiLDto): Promise<MessageResponse> {
+		return await this.authService.forgotPassword(emailDto);
 	}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('verifyResetCode')
-	async verifyResetCode(): Promise<void> {
-		throw new NotImplementedException();
+	async verifyResetCode(
+		@Body() verificationAuthCodeDto: VerificationAuthCodeDto,
+	): Promise<MessageResponse> {
+		return await this.authService.verifyResetCode(verificationAuthCodeDto);
 	}
 
 	@HttpCode(HttpStatus.OK)
 	@Post('resetPassword')
-	async resetPassword(): Promise<void> {
-		throw new NotImplementedException();
+	async resetPassword(@Body() passwordResetDto: PasswordResetDto): Promise<MessageResponse> {
+		return await this.authService.resetPassword(passwordResetDto);
 	}
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotAcceptableException } from '@nestjs/common';
 import { MessageResponse } from 'src/auth/interfaces';
 import { EmailType } from 'src/mail/enums';
 import { MailService } from 'src/mail/mail.service';
@@ -30,9 +30,9 @@ export class UserService {
 		const { code } = verificationCodeDto;
 		const result = await this.userRepository.verifyEmailCode(code, user.id);
 		if (!result) {
-			return { message: 'Invalid code' };
+			throw new NotAcceptableException('Invalid verification Code');
 		}
-		return { message: 'Email updated successfully' };
+		return { message: 'code verified successfully' };
 	}
 
 	async updateEmail(emailDto: EmaiLDto, user: UserEntity): Promise<UserEntity> {

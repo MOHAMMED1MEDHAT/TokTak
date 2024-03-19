@@ -68,22 +68,40 @@ export class AuthRepository extends Repository<UserEntity> {
 		return argon.verify(hash, pass);
 	}
 
-	async verifyCode(code: string, userId: string): Promise<UserEntity> {
+	async generateResetPasswordCode(email: string): Promise<string> {
+		this.logger.log('generateResetPasswordCode');
+		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+		const codeExpiry = Date.now() + parseInt(process.env.PASSWORD_RESET_EXPIRY_IN_MIN) * 60 * 1000;
+
+		const user = await this.findOneBy({ email });
+		user.passwordResetCode = code;
+		user.passwordResetCodeExpires = new Date(codeExpiry);
+		this.logger.verbose(
+			`code: ${code}, expires: ${user.passwordResetCodeExpires},now: ${new Date(Date.now())}`,
+		);
+
+		return code;
+	}
+
+	async verifyResetPasswordCode(code: string, userId: string): Promise<UserEntity> {
 		this.logger.log('verifyUser');
 		const user = await this.findOneBy({ id: userId, emailConfirmationCode: code });
+
 		const now = new Date();
-		if (user && user.emailConfirmationCodeExpires > now) {
-			user.isEmailConfirmed = true;
-			user.emailConfirmationCode = null;
-			user.emailConfirmationCodeExpires = null;
+
+		if (user && user.passwordResetCodeExpires > now) {
+			user.passwordResetCode = null;
+			user.passwordResetCodeExpires = null;
 			await this.save(user);
 			return user;
 		}
+
+		return null;
 	}
 
-	//TODO: implement the following method
-	// async resetPassword(email: string, code: string, newPassword: string): Promise<UserEntity> {}
-
-	//TODO: implement the following method
-	// async changePassword(user: UserEntity, newPassword: string): Promise<UserEntity> {}
+	async changePassword(user: UserEntity, newPassword: string): Promise<UserEntity> {
+		this.logger.log('changePassword');
+		user.passwordHash = await this.hashPassword(newPassword);
+		return await this.save(user);
+	}
 }

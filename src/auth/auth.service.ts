@@ -9,9 +9,11 @@ import {
 } from '@nestjs/common';
 import { EmailType } from 'src/mail/enums';
 import { MailService } from 'src/mail/mail.service';
+import { EmaiLDto } from 'src/user/dtos';
 import { UserRepository } from 'src/user/repositories';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationAuthCodeDto } from './dtos';
+import { PasswordResetDto } from './dtos/passwordReset.dto';
 import { AuthSessionAttribute } from './enums';
 import { TokenType } from './enums/tokenType.enum';
 import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
@@ -139,5 +141,49 @@ export class AuthService {
 			throw new HttpException('Invalid verification code', HttpStatus.NOT_ACCEPTABLE);
 		}
 		return { message: 'Email verified successfully' };
+	}
+
+	async forgotPassword(emailDto: EmaiLDto): Promise<MessageResponse> {
+		const { email } = emailDto;
+		const code = await this.authRepository.generateResetPasswordCode(email);
+
+		const user = await this.userRepository.getUserByEmail(email);
+
+		await this.mailService.sendMail(user, EmailType.RESET_PASSWORD, code);
+
+		return { message: `Password reset link sent to your email: ${email}` };
+	}
+
+	async verifyResetCode(
+		verificationAuthCodeDto: VerificationAuthCodeDto,
+	): Promise<MessageResponse> {
+		const { code, email } = verificationAuthCodeDto;
+		const user = await this.userRepository.getUserByEmail(email);
+		const result = await this.authRepository.verifyResetPasswordCode(code, user.id);
+
+		if (!result) {
+			throw new NotAcceptableException('Invalid Reset code');
+		}
+		return { message: 'Code verified successfully' };
+	}
+
+	async resetPassword(passwordResetDto: PasswordResetDto): Promise<MessageResponse> {
+		const { email, password, confirmPassword } = passwordResetDto;
+
+		if (password !== confirmPassword) {
+			throw new NotAcceptableException('Passwords do not match');
+		}
+
+		const user = await this.userRepository.getUserByEmail(email);
+
+		const result = await this.authRepository.changePassword(user, password);
+
+		if (!result) {
+			throw new InternalServerErrorException('Failed to reset password');
+		}
+
+		await this.mailService.sendMail(user, EmailType.PASSWORD_CHANGED);
+
+		return { message: 'Password reset successfully' };
 	}
 }
