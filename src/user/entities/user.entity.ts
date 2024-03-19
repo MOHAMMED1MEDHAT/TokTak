@@ -136,10 +136,10 @@ export class UserEntity extends BaseEntity {
 	passwordChangedAt: Date;
 
 	@Column({ nullable: true })
-	emailConfirmationToken: string;
+	emailConfirmationCode: string;
 
 	@Column({ type: 'date', nullable: true })
-	emailConfirmationTokenExpires: Date;
+	emailConfirmationCodeExpires: Date;
 
 	@Column({ default: false })
 	isEmailConfirmed: boolean;

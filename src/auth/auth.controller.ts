@@ -13,16 +13,11 @@ import { AuthService } from './auth.service';
 import { GetPayload, GetUser } from './decorators';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
-import {
-	JwtPayload,
-	LoginResponse,
-	MessageResponse,
-	RefreshTokenResponse,
-} from './interfaces';
+import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
 
 @Controller('auth')
 export class AuthController {
-	private logger = new Logger('AuthController');
+	private logger = new Logger(AuthController.name);
 
 	constructor(private authService: AuthService) {}
 
@@ -40,17 +35,19 @@ export class AuthController {
 
 	@HttpCode(HttpStatus.CREATED)
 	@Post('signup')
-	async signup(
-		@Body() authDto: AuthSignupCredentialsDto,
-	): Promise<MessageResponse> {
+	async signup(@Body() authDto: AuthSignupCredentialsDto): Promise<MessageResponse> {
 		return await this.authService.signUp(authDto);
 	}
 
 	@HttpCode(HttpStatus.OK)
+	@Post('verify')
+	async verify(@Body('code') code: string): Promise<MessageResponse> {
+		return await this.authService.verify(code);
+	}
+
+	@HttpCode(HttpStatus.OK)
 	@Post('login')
-	async login(
-		@Body() authDto: AuthLoginCredentialsDto,
-	): Promise<LoginResponse> {
+	async login(@Body() authDto: AuthLoginCredentialsDto): Promise<LoginResponse> {
 		return await this.authService.login(authDto);
 	}
 

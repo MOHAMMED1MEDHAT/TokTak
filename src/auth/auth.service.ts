@@ -7,32 +7,27 @@ import {
 	Logger,
 	NotAcceptableException,
 } from '@nestjs/common';
+import { EmailType } from 'src/mail/enums';
+import { MailService } from 'src/mail/mail.service';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
 import { AuthSessionAttribute } from './enums';
 import { TokenType } from './enums/tokenType.enum';
-import {
-	JwtPayload,
-	LoginResponse,
-	MessageResponse,
-	RefreshTokenResponse,
-} from './interfaces';
+import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
 import { AuthRepository, AuthSessionRepository } from './repositories';
 
 @Injectable()
 export class AuthService {
 	private logger = new Logger('AuthService');
 	constructor(
+		private mailService: MailService,
 		private authRepository: AuthRepository,
 		private authSessionRepository: AuthSessionRepository,
 	) {}
 
-	async signUp(
-		authSignupCredentialsDto: AuthSignupCredentialsDto,
-	): Promise<MessageResponse> {
-		this.logger.log('signUp');
-		const { email, firstName, lastName, confirmPassword, password } =
-			authSignupCredentialsDto;
+	async signUp(authSignupCredentialsDto: AuthSignupCredentialsDto): Promise<MessageResponse> {
+		// this.logger.log('signUp');
+		const { email, firstName, lastName, confirmPassword, password } = authSignupCredentialsDto;
 
 		if (password !== confirmPassword) {
 			// this.logger.error('Passwords do not match');
@@ -56,6 +51,10 @@ export class AuthService {
 					throw new InternalServerErrorException('Failed to save user');
 			}
 		}
+
+		const mailVerificationCode = await this.authRepository.generateVerificationCode(user.id);
+
+		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION);
 
 		return {
 			message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
@@ -98,15 +97,12 @@ export class AuthService {
 		};
 	}
 
-	async externalAuthentication(): Promise<LoginResponse | MessageResponse>;
+	async externalAuthentication(): Promise<LoginResponse | MessageResponse> {}
 
 	async refresh(userId: string): Promise<RefreshTokenResponse> {
-		const refreshToken = (
-			await this.authSessionRepository.findOneBy({ userId })
-		).refreshToken;
+		const refreshToken = (await this.authSessionRepository.findOneBy({ userId })).refreshToken;
 
-		const refreshTokenPayload =
-			await this.authRepository.getPayload(refreshToken);
+		const refreshTokenPayload = await this.authRepository.getPayload(refreshToken);
 
 		this.logger.verbose(`refreshTokenPayload ${refreshTokenPayload}`);
 
@@ -126,14 +122,19 @@ export class AuthService {
 		};
 	}
 
-	async logout(
-		user: UserEntity,
-		payload: JwtPayload,
-	): Promise<MessageResponse> {
+	async logout(user: UserEntity, payload: JwtPayload): Promise<MessageResponse> {
 		this.logger.log('logout');
 		await this.authSessionRepository.invalidateSession(payload.authSessionId);
 		this.logger.log(`User ${user.email} has been logged out`);
 
 		return { message: 'User logged out successfully' };
+	}
+
+	async verify(code: string): Promise<MessageResponse> {
+		const user = await this.authRepository.verifyUser(code);
+		if (!user) {
+			throw new HttpException('Invalid verification code', HttpStatus.NOT_ACCEPTABLE);
+		}
+		return { message: 'Email verified successfully' };
 	}
 }

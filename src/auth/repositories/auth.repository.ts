@@ -5,13 +5,11 @@ import { DataSource, Repository } from 'typeorm';
 import { UserEntity } from '../../user/entities/user.entity';
 import { TokenType } from '../enums/tokenType.enum';
 import { JwtPayload } from '../interfaces/jwtPayload.interface';
-import { AuthSessionRepository } from './authSession.repository';
 
 @Injectable()
 export class AuthRepository extends Repository<UserEntity> {
 	private logger = new Logger('AuthRepository');
 	constructor(
-		private authSessionRepository: AuthSessionRepository,
 		private dataSource: DataSource,
 		private jwtService: JwtService,
 	) {
@@ -29,11 +27,7 @@ export class AuthRepository extends Repository<UserEntity> {
 		return null;
 	}
 
-	async generateToken(
-		userId: string,
-		sessionId: string,
-		tokenType: TokenType,
-	): Promise<string> {
+	async generateToken(userId: string, sessionId: string, tokenType: TokenType): Promise<string> {
 		this.logger.log('generateAccessToken');
 		const user = await this.findOne({ where: { id: userId } });
 
@@ -60,6 +54,12 @@ export class AuthRepository extends Repository<UserEntity> {
 		});
 	}
 
+	async generateCode(): Promise<string> {
+		this.logger.log('generateCode');
+		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+		this.logger.log(`code: ${code}`);
+		return code;
+	}
 	async getPayload(token: string): Promise<JwtPayload> {
 		return await this.jwtService.decode(token);
 	}
@@ -73,4 +73,23 @@ export class AuthRepository extends Repository<UserEntity> {
 		this.logger.log('comparePassword');
 		return argon.verify(hash, pass);
 	}
+
+	async verifyUser(code: string): Promise<UserEntity> {
+		// this.logger.log('verifyUser');
+		const user = await this.findOneBy({ emailConfirmationCode: code });
+		const now = new Date();
+		if (user && user.emailConfirmationCodeExpires > now) {
+			user.isEmailConfirmed = true;
+			user.emailConfirmationCode = null;
+			user.emailConfirmationCodeExpires = null;
+			await this.save(user);
+			return user;
+		}
+	}
+
+	//TODO: implement the following method
+	async resetPassword(email: string, code: string, newPassword: string): Promise<UserEntity> {}
+
+	//TODO: implement the following method
+	async changePassword(user: UserEntity, newPassword: string): Promise<UserEntity> {}
 }
