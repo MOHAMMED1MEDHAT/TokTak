@@ -54,12 +54,23 @@ export class AuthRepository extends Repository<UserEntity> {
 		});
 	}
 
-	async generateCode(): Promise<string> {
+	async generateEmailConfirmationCode(userId: string): Promise<string> {
 		this.logger.log('generateCode');
 		const code = Math.random().toString(36).substring(2, 8).toUpperCase();
-		this.logger.log(`code: ${code}`);
+		const codeExpiry =
+			Date.now() + parseInt(process.env.EMAIL_CONFIRMATION_EXPIRY_IN_MIN) * 60 * 1000;
+
+		const user = await this.findOneBy({ id: userId });
+		user.emailConfirmationCode = code;
+		user.emailConfirmationCodeExpires = new Date(codeExpiry);
+		this.logger.verbose(
+			`code: ${code}, expires: ${user.emailConfirmationCodeExpires},now: ${new Date(Date.now())}`,
+		);
+
+		await this.save(user);
 		return code;
 	}
+
 	async getPayload(token: string): Promise<JwtPayload> {
 		return await this.jwtService.decode(token);
 	}
@@ -75,7 +86,7 @@ export class AuthRepository extends Repository<UserEntity> {
 	}
 
 	async verifyUser(code: string): Promise<UserEntity> {
-		// this.logger.log('verifyUser');
+		this.logger.log('verifyUser');
 		const user = await this.findOneBy({ emailConfirmationCode: code });
 		const now = new Date();
 		if (user && user.emailConfirmationCodeExpires > now) {
@@ -88,8 +99,8 @@ export class AuthRepository extends Repository<UserEntity> {
 	}
 
 	//TODO: implement the following method
-	async resetPassword(email: string, code: string, newPassword: string): Promise<UserEntity> {}
+	// async resetPassword(email: string, code: string, newPassword: string): Promise<UserEntity> {}
 
 	//TODO: implement the following method
-	async changePassword(user: UserEntity, newPassword: string): Promise<UserEntity> {}
+	// async changePassword(user: UserEntity, newPassword: string): Promise<UserEntity> {}
 }

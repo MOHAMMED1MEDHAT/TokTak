@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { MailService } from 'src/mail/mail.service';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -24,6 +25,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 		JwtStrategy,
 		RefreshJwtStrategy,
 		GoogleStrategy,
+		MailService,
 	],
 	exports: [JwtStrategy, RefreshJwtStrategy, GoogleStrategy],
 })

@@ -52,9 +52,8 @@ export class AuthService {
 			}
 		}
 
-		const mailVerificationCode = await this.authRepository.generateVerificationCode(user.id);
-
-		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION);
+		const mailVerificationCode = await this.authRepository.generateEmailConfirmationCode(user.id);
+		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
 
 		return {
 			message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
@@ -97,7 +96,7 @@ export class AuthService {
 		};
 	}
 
-	async externalAuthentication(): Promise<LoginResponse | MessageResponse> {}
+	// async externalAuthentication(): Promise<LoginResponse | MessageResponse> {}
 
 	async refresh(userId: string): Promise<RefreshTokenResponse> {
 		const refreshToken = (await this.authSessionRepository.findOneBy({ userId })).refreshToken;
