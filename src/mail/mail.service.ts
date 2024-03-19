@@ -2,6 +2,7 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { UserEntity } from './../user/entities';
 import { EmailType } from './enums';
+import { EmailData, EmailUpdateData, ResetPasswordEmailData, VerifyEmailData } from './interfaces';
 
 @Injectable()
 export class MailService {
@@ -22,6 +23,9 @@ export class MailService {
 			case EmailType.USER_WELCOME:
 				await this.sendWelcome(user);
 				break;
+			case EmailType.EMAIL_UPDATE:
+				await this.sendEmailUpdate(user, code);
+				break;
 			default:
 				this.logger.error('Invalid email type');
 				break;
@@ -29,51 +33,82 @@ export class MailService {
 	}
 
 	private async sendUserConfirmation(user: UserEntity, code: string): Promise<void> {
+		const data: VerifyEmailData = {
+			name: user.firstName,
+			verificationCode: code,
+		};
+
 		await this.mailerService.sendMail({
 			to: user.email,
-			from: '"Support Team" <support@toktak.com>',
 			subject: 'Welcome to Toktak! Confirm your Email',
 			template: './verification',
 			context: {
-				name: user.firstName,
-				code,
+				name: data.name,
+				code: data.verificationCode,
 			},
 		});
 	}
 
 	private async sendPasswordReset(user: UserEntity, code: string): Promise<void> {
+		const data: ResetPasswordEmailData = {
+			name: user.firstName,
+			resetPasswordCode: code,
+		};
+
 		await this.mailerService.sendMail({
 			to: user.email,
-			from: '"Support Team" <support@toktak.com>',
 			subject: 'Reset your password!',
 			template: './passwordReset',
 			context: {
-				name: user.firstName,
-				code,
+				name: data.name,
+				code: data.resetPasswordCode,
+			},
+		});
+	}
+
+	private async sendEmailUpdate(user: UserEntity, code: string): Promise<void> {
+		const data: EmailUpdateData = {
+			name: user.firstName,
+			emailUpdateCode: code,
+		};
+
+		await this.mailerService.sendMail({
+			to: user.email,
+			subject: 'Email update confirmation!',
+			template: './emailUpdate',
+			context: {
+				name: data.name,
+				code: data.emailUpdateCode,
 			},
 		});
 	}
 
 	private async sendPasswordChanged(user: UserEntity): Promise<void> {
+		const data: EmailData = {
+			name: user.firstName,
+		};
+
 		await this.mailerService.sendMail({
 			to: user.email,
-			from: '"Support Team" <support@toktak.com>',
 			subject: 'Your password has been changed!',
 			template: './passwordChanged',
 			context: {
-				name: user.firstName,
+				name: data.name,
 			},
 		});
 	}
 
 	private async sendWelcome(user: UserEntity): Promise<void> {
+		const data: EmailData = {
+			name: user.firstName,
+		};
+
 		await this.mailerService.sendMail({
 			to: user.email,
-			from: '"Support Team" <support@toktak.com>',
 			subject: 'Welcome to Toktak',
 			template: './welcome',
 			context: {
-				name: user.firstName,
+				name: data.name,
 			},
 		});
 	}

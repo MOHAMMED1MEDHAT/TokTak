@@ -9,8 +9,9 @@ import {
 } from '@nestjs/common';
 import { EmailType } from 'src/mail/enums';
 import { MailService } from 'src/mail/mail.service';
+import { UserRepository } from 'src/user/repositories';
 import { UserEntity } from '../user/entities/user.entity';
-import { AuthLoginCredentialsDto, AuthSignupCredentialsDto } from './dtos';
+import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationCodeDto } from './dtos';
 import { AuthSessionAttribute } from './enums';
 import { TokenType } from './enums/tokenType.enum';
 import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
@@ -23,6 +24,7 @@ export class AuthService {
 		private mailService: MailService,
 		private authRepository: AuthRepository,
 		private authSessionRepository: AuthSessionRepository,
+		private userRepository: UserRepository,
 	) {}
 
 	async signUp(authSignupCredentialsDto: AuthSignupCredentialsDto): Promise<MessageResponse> {
@@ -41,7 +43,7 @@ export class AuthService {
 		user.passwordHash = await this.authRepository.hashPassword(password);
 
 		try {
-			await user.save();
+			await this.userRepository.createNewUser(user);
 		} catch (error) {
 			this.logger.error(`Failed to save user: ${error}`);
 			switch (error.name) {
@@ -52,13 +54,15 @@ export class AuthService {
 			}
 		}
 
-		const mailVerificationCode = await this.authRepository.generateEmailConfirmationCode(user.id);
+		const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
 		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
 
 		return {
 			message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
 		};
 	}
+
+	// async externalAuthentication(): Promise<LoginResponse | MessageResponse> {}
 
 	async login(authDto: AuthLoginCredentialsDto): Promise<LoginResponse> {
 		const { email, password } = authDto;
@@ -96,8 +100,6 @@ export class AuthService {
 		};
 	}
 
-	// async externalAuthentication(): Promise<LoginResponse | MessageResponse> {}
-
 	async refresh(userId: string): Promise<RefreshTokenResponse> {
 		const refreshToken = (await this.authSessionRepository.findOneBy({ userId })).refreshToken;
 
@@ -129,8 +131,10 @@ export class AuthService {
 		return { message: 'User logged out successfully' };
 	}
 
-	async verify(code: string): Promise<MessageResponse> {
-		const user = await this.authRepository.verifyUser(code);
+	async verifyUserEmail(verificationCodeDto: VerificationCodeDto): Promise<MessageResponse> {
+		const { code, email } = verificationCodeDto;
+		const userId = (await this.userRepository.getUserByEmail(email)).id;
+		const user = await this.userRepository.verifyEmailCode(code, userId);
 		if (!user) {
 			throw new HttpException('Invalid verification code', HttpStatus.NOT_ACCEPTABLE);
 		}

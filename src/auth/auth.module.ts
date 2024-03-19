@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MailService } from 'src/mail/mail.service';
+import { UserRepository } from 'src/user/repositories';
 import { UserEntity } from '../user/entities/user.entity';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -21,6 +22,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 	providers: [
 		AuthRepository,
 		AuthSessionRepository,
+		UserRepository,
 		AuthService,
 		JwtStrategy,
 		RefreshJwtStrategy,
