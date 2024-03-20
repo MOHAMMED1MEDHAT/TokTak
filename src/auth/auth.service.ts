@@ -89,8 +89,8 @@ export class AuthService {
 
 			await this.userRepository.createNewUser(newUser);
 
-			const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
-			await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
+			const mailVerificationCode = await this.userRepository.generateEmailCode(newUser.id);
+			await this.mailService.sendMail(newUser, EmailType.USER_CONFIRMATION, mailVerificationCode);
 
 			return {
 				message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
@@ -118,6 +118,8 @@ export class AuthService {
 			AuthSessionAttribute.REFRESH_TOKEN,
 			refreshToken,
 		);
+
+		delete user.passwordHash;
 
 		return {
 			user,
