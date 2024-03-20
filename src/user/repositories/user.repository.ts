@@ -1,6 +1,6 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { UserEntity } from '../entities/user.entity';
+import { UserEntity } from '../entities';
 
 @Injectable()
 export class UserRepository extends Repository<UserEntity> {
@@ -15,8 +15,7 @@ export class UserRepository extends Repository<UserEntity> {
 		const user = await this.findOneBy({ id: userId });
 
 		if (!user) {
-			this.logger.error(`User with id: ${userId} not found`);
-			throw new NotFoundException(`User with id: ${userId} not found`);
+			return null;
 		}
 
 		return user;
@@ -27,8 +26,7 @@ export class UserRepository extends Repository<UserEntity> {
 		const user = await this.findOneBy({ email });
 
 		if (!user) {
-			this.logger.error(`User with email: ${email} not found`);
-			throw new NotFoundException(`User with email: ${email} not found`);
+			return null;
 		}
 
 		return user;

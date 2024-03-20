@@ -1,8 +1,4 @@
-import {
-	Injectable,
-	InternalServerErrorException,
-	Logger,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { UserEntity } from 'src/user/entities';
 import { DataSource, Repository } from 'typeorm';
 import { AuthSessionEntity } from '../entities/authSession.entity';
