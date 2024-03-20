@@ -21,10 +21,10 @@ import {
 import { AuthSessionAttribute } from './enums';
 import { TokenType } from './enums/tokenType.enum';
 import {
-	GoogleScopeData,
 	JwtPayload,
 	LoginResponse,
 	MessageResponse,
+	OauthScopeData,
 	RefreshTokenResponse,
 } from './interfaces';
 import { AuthRepository, AuthSessionRepository } from './repositories';
@@ -75,7 +75,7 @@ export class AuthService {
 	}
 
 	async externalAuthentication(
-		data: GoogleScopeData,
+		data: OauthScopeData,
 	): Promise<LoginResponse | MessageResponse | void> {
 		const user = await this.userRepository.getUserByEmail(data.email);
 

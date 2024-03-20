@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MailService } from 'src/mail/mail.service';
-import { UserRepository } from 'src/user/repositories';
-import { UserEntity } from '../user/entities/user.entity';
+import { MailService } from '../mail/mail.service';
+import { UserEntity } from '../user/entities';
+import { UserRepository } from '../user/repositories';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository, AuthSessionRepository } from './repositories';
-import { JwtStrategy, RefreshJwtStrategy } from './strategies';
-import { GoogleStrategy } from './strategies/google.strategy';
+import { FacebookStrategy, GoogleStrategy, JwtStrategy, RefreshJwtStrategy } from './strategies';
 
 @Module({
 	imports: [
@@ -27,8 +26,9 @@ import { GoogleStrategy } from './strategies/google.strategy';
 		JwtStrategy,
 		RefreshJwtStrategy,
 		GoogleStrategy,
+		FacebookStrategy,
 		MailService,
 	],
-	exports: [JwtStrategy, RefreshJwtStrategy, GoogleStrategy],
+	exports: [JwtStrategy, RefreshJwtStrategy, GoogleStrategy, FacebookStrategy],
 })
 export class AuthModule {}

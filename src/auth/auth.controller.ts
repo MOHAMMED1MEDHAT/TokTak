@@ -5,25 +5,27 @@ import {
 	HttpCode,
 	HttpStatus,
 	Logger,
+	NotImplementedException,
 	Post,
+	Req,
 	UseGuards,
 } from '@nestjs/common';
 import { EmaiLDto } from 'src/user/dtos';
 import { UserEntity } from '../user/entities';
 import { AuthService } from './auth.service';
-import { GetGoogleScopeData, GetPayload, GetUser } from './decorators';
+import { GetOauthScopeData, GetPayload, GetUser } from './decorators';
 import {
 	AuthLoginCredentialsDto,
 	AuthSignupCredentialsDto,
 	PasswordResetDto,
 	VerificationAuthCodeDto,
 } from './dtos';
-import { GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
+import { FacebookOauthGuard, GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
 import {
-	GoogleScopeData,
 	JwtPayload,
 	LoginResponse,
 	MessageResponse,
+	OauthScopeData,
 	RefreshTokenResponse,
 } from './interfaces';
 
@@ -35,16 +37,29 @@ export class AuthController {
 
 	@Get('google')
 	@UseGuards(GoogleOauthGuard)
-	async googleAuth(@GetUser() user: UserEntity): Promise<void> {
-		this.logger.debug(user);
-	}
+	async googleAuth(): Promise<void> {}
 
 	@Get('google/callback')
 	@UseGuards(GoogleOauthGuard)
 	async googleAuthCallback(
-		@GetGoogleScopeData() data: GoogleScopeData,
+		@GetOauthScopeData() data: OauthScopeData,
 	): Promise<MessageResponse | LoginResponse | void> {
 		return await this.authService.externalAuthentication(data);
+	}
+
+	@Get('facebook')
+	@UseGuards(FacebookOauthGuard)
+	async facebookAuth(@Req() req: Request): Promise<void> {
+		// console.log(req);
+		throw new NotImplementedException();
+	}
+
+	@Get('facebook/callback')
+	@UseGuards(FacebookOauthGuard)
+	async facebookAuthCallback(@Req() req: Request): Promise<MessageResponse | LoginResponse | void> {
+		// console.log(req);
+		throw new NotImplementedException();
+		// return await this.authService.externalAuthentication(data);
 	}
 
 	@HttpCode(HttpStatus.CREATED)

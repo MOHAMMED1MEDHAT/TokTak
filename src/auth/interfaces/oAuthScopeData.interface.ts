@@ -1,5 +1,5 @@
-export interface GoogleScopeData {
-	provider: 'google';
+export interface OauthScopeData {
+	provider: string;
 	providerId: string;
 	email: string;
 	firstName: string;
