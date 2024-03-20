@@ -12,11 +12,21 @@ import { MailService } from 'src/mail/mail.service';
 import { EmaiLDto } from 'src/user/dtos';
 import { UserRepository } from 'src/user/repositories';
 import { UserEntity } from '../user/entities/user.entity';
-import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationAuthCodeDto } from './dtos';
-import { PasswordResetDto } from './dtos/passwordReset.dto';
+import {
+	AuthLoginCredentialsDto,
+	AuthSignupCredentialsDto,
+	PasswordResetDto,
+	VerificationAuthCodeDto,
+} from './dtos';
 import { AuthSessionAttribute } from './enums';
 import { TokenType } from './enums/tokenType.enum';
-import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
+import {
+	GoogleScopeData,
+	JwtPayload,
+	LoginResponse,
+	MessageResponse,
+	RefreshTokenResponse,
+} from './interfaces';
 import { AuthRepository, AuthSessionRepository } from './repositories';
 
 @Injectable()
@@ -64,7 +74,57 @@ export class AuthService {
 		};
 	}
 
-	// async externalAuthentication(): Promise<LoginResponse | MessageResponse> {}
+	async externalAuthentication(
+		data: GoogleScopeData,
+	): Promise<LoginResponse | MessageResponse | void> {
+		const user = await this.userRepository.getUserByEmail(data.email);
+
+		//if user does not exist, create a new user
+		if (!user) {
+			const newUser = new UserEntity();
+			newUser.email = data.email;
+			newUser.firstName = data.firstName;
+			newUser.lastName = data.lastName;
+			newUser.photo = data.picture;
+
+			await this.userRepository.createNewUser(newUser);
+
+			const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
+			await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
+
+			return {
+				message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
+			};
+		}
+
+		//if user exists, create an authSession for user
+
+		//1) create an authSession for user
+		const session = await this.authSessionRepository.createSession(user.id);
+		//2) create authentication tokens for user
+		const accessToken = await this.authRepository.generateToken(
+			user.id,
+			session.id,
+			TokenType.ACCESS_TOKEN,
+		);
+		const refreshToken = await this.authRepository.generateToken(
+			user.id,
+			session.id,
+			TokenType.REFRESH_TOKEN,
+		);
+		//3) add the refreshToken to the authSession
+		await this.authSessionRepository.addAttribute(
+			session.id,
+			AuthSessionAttribute.REFRESH_TOKEN,
+			refreshToken,
+		);
+
+		return {
+			user,
+			accessToken,
+			refreshToken,
+		};
+	}
 
 	async login(authDto: AuthLoginCredentialsDto): Promise<LoginResponse> {
 		const { email, password } = authDto;

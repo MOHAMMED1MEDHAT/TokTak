@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth2';
+import { GoogleScopeData } from '../interfaces';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -13,18 +14,24 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 		});
 	}
 
-	async validate(profile: any, done: VerifyCallback): Promise<any> {
+	async validate(
+		_accessToken: string,
+		_refreshToken: string,
+		profile: any,
+		done: VerifyCallback,
+	): Promise<any> {
 		const { id, name, emails, photos } = profile;
 
-		const user = {
+		const scope: GoogleScopeData = {
 			provider: 'google',
 			providerId: id,
 			email: emails[0].value,
-			name: `${name.givenName} ${name.familyName}`,
+			firstName: name.givenName,
+			lastName: name.familyName,
 			picture: photos[0].value,
 		};
 
-		const data = { user, payload: { from: 'google' } };
+		const data = { scope, payload: { from: 'google' } };
 
 		done(null, data);
 	}

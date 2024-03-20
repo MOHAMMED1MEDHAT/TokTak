@@ -11,11 +11,21 @@ import {
 import { EmaiLDto } from 'src/user/dtos';
 import { UserEntity } from '../user/entities';
 import { AuthService } from './auth.service';
-import { GetPayload, GetUser } from './decorators';
-import { AuthLoginCredentialsDto, AuthSignupCredentialsDto, VerificationAuthCodeDto } from './dtos';
-import { PasswordResetDto } from './dtos/passwordReset.dto';
+import { GetGoogleScopeData, GetPayload, GetUser } from './decorators';
+import {
+	AuthLoginCredentialsDto,
+	AuthSignupCredentialsDto,
+	PasswordResetDto,
+	VerificationAuthCodeDto,
+} from './dtos';
 import { GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
-import { JwtPayload, LoginResponse, MessageResponse, RefreshTokenResponse } from './interfaces';
+import {
+	GoogleScopeData,
+	JwtPayload,
+	LoginResponse,
+	MessageResponse,
+	RefreshTokenResponse,
+} from './interfaces';
 
 @Controller('auth')
 export class AuthController {
@@ -29,11 +39,13 @@ export class AuthController {
 		this.logger.debug(user);
 	}
 
-	// @Get('google/callback')
-	// @UseGuards(GoogleOauthGuard)
-	// async googleAuthCallback(@GetUser() user: any): Promise<void> {
-	// 	this.logger.debug(user);
-	// }
+	@Get('google/callback')
+	@UseGuards(GoogleOauthGuard)
+	async googleAuthCallback(
+		@GetGoogleScopeData() data: GoogleScopeData,
+	): Promise<MessageResponse | LoginResponse | void> {
+		return await this.authService.externalAuthentication(data);
+	}
 
 	@HttpCode(HttpStatus.CREATED)
 	@Post('signup')
