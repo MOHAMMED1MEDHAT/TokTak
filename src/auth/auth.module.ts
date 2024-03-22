@@ -7,7 +7,13 @@ import { UserRepository } from '../user/repositories';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository, AuthSessionRepository } from './repositories';
-import { FacebookStrategy, GoogleStrategy, JwtStrategy, RefreshJwtStrategy } from './strategies';
+import {
+	FacebookStrategy,
+	GoogleStrategy,
+	JwtStrategy,
+	RefreshJwtStrategy,
+	TwitterStrategy,
+} from './strategies';
 
 @Module({
 	imports: [
@@ -27,6 +33,7 @@ import { FacebookStrategy, GoogleStrategy, JwtStrategy, RefreshJwtStrategy } fro
 		RefreshJwtStrategy,
 		GoogleStrategy,
 		FacebookStrategy,
+		TwitterStrategy,
 		MailService,
 	],
 	exports: [JwtStrategy, RefreshJwtStrategy, GoogleStrategy, FacebookStrategy],
