@@ -1,7 +1,7 @@
-import { UserEntity } from './../../user/user.entity';
+import { UserEntity } from '../../user/entities/user.entity';
 
 export interface LoginResponse {
 	user: UserEntity;
-	access_token: string;
-	refresh_token: string;
+	accessToken: string;
+	refreshToken: string;
 }

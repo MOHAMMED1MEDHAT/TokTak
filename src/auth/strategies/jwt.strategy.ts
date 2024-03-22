@@ -1,27 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from 'src/user/user.entity';
-import { AuthRepository } from '../auth.repository';
+import { JwtPayload } from '../interfaces';
+import { AuthRepository } from '../repositories';
+import { UserEntity } from './../../user/entities';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
-	constructor(
-		private readonly configService: ConfigService,
-		private authRepository: AuthRepository,
-	) {
+	constructor(private authRepository: AuthRepository) {
 		super({
 			jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
 			ignoreExpiration: false,
-			secretOrKey: `${process.env.JWT_ACCESS_TOKEN_SECRET}`,
+			secretOrKey: `${process.env.JWT_ACCESS_SECRET}`,
 		});
 	}
 
-	async validate(payload: { sub: string; email: string }): Promise<UserEntity> {
+	async validate(
+		payload: JwtPayload,
+	): Promise<{ user: UserEntity; payload: JwtPayload }> {
+		const { email } = payload;
 		const user = await this.authRepository.findOne({
 			where: {
-				email: payload.email,
+				email,
 			},
 		});
 
@@ -29,8 +29,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 			return null;
 		}
 
-		delete user.password;
+		delete user.passwordHash;
 
-		return user;
+		const data = {
+			user,
+			payload: payload,
+		};
+
+		return data;
 	}
 }

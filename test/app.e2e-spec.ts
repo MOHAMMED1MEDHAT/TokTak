@@ -2,23 +2,28 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as pactum from 'pactum';
 import { AuthSignupCredentialsDto } from 'src/auth/dtos';
+import { UserEntity } from '../src/user/entities/user.entity';
 import { AppModule } from './../src/app.module';
 
 const validAuthSignupDto: AuthSignupCredentialsDto = {
-	email: 'demo22793@gmail.com',
+	email: 'demo2273@gmail.com',
 	password: '12345678910@Test',
-	confirmPassword: '12345678',
+	confirmPassword: '12345678910@Test',
 	firstName: 'demo',
 	lastName: 'demo',
 };
 
 const invalidAuthSignupDto: AuthSignupCredentialsDto = {
-	email: 'demo22793@gmail.com',
-	password: '12345678',
+	email: 'demo2273@gmail.com',
+	password: '12345678910',
 	confirmPassword: '12345678',
 	firstName: 'demo',
 	lastName: 'demo',
 };
+
+async function clearDB(): Promise<void> {
+	await UserEntity.delete({});
+}
 
 describe('app e2e', () => {
 	let app: INestApplication;
@@ -44,6 +49,7 @@ describe('app e2e', () => {
 	});
 
 	afterAll(async () => {
+		await clearDB();
 		await app.close();
 	});
 
@@ -71,12 +77,7 @@ describe('app e2e', () => {
 					})
 					.expectBody({
 						error: 'Bad Request',
-						message: [
-							'Password too weak',
-							'Password is too short. Minimal length is 10 characters, but actual is 12345678',
-							'Password too weak',
-							'Password is too short. Minimal length is 10 characters, but actual is 12345678',
-						],
+						message: ['Password too weak'],
 						statusCode: 400,
 					});
 			});
@@ -104,6 +105,9 @@ describe('app e2e', () => {
 					.spec()
 					.post('/auth/signup')
 					.withBody(validAuthSignupDto)
+					.expectBody({
+						message: `User ${validAuthSignupDto.email} has been created`,
+					})
 					.expectStatus(201);
 			});
 
@@ -112,7 +116,11 @@ describe('app e2e', () => {
 					.spec()
 					.post('/auth/signup')
 					.withBody(validAuthSignupDto)
-					.expectStatus(400);
+					.expectBody({
+						error: 'Conflict',
+						message: 'User already exists',
+						statusCode: 409,
+					});
 			});
 		});
 
@@ -133,14 +141,9 @@ describe('app e2e', () => {
 					.post('/auth/login')
 					.withBody({
 						email: validAuthSignupDto.email,
-						password: '12345',
+						password: '12345678910@Test2',
 					})
-					.expectBody({
-						message: 'Invalid Credentials',
-						error: 'Bad Request',
-						statusCode: 400,
-					})
-					.expectStatus(400);
+					.expectBody({ message: 'Invalid credentials', statusCode: 401 });
 			});
 			it('should login', () => {
 				return pactum
@@ -148,8 +151,9 @@ describe('app e2e', () => {
 					.post('/auth/login')
 					.withBody(validAuthSignupDto)
 					.expectStatus(200)
-					.stores('userAt', 'data.token')
-					.stores('userId', 'data.user.id');
+					.stores('userAt', 'data.access_token')
+					.stores('userRt', 'data.refresh_token')
+					.stores('userId', 'data.sub.id');
 			});
 		});
 
@@ -158,7 +162,7 @@ describe('app e2e', () => {
 				return pactum
 					.spec()
 					.post('/auth/logout')
-					.withBearerToken('$S{userAt}')
+					.withBearerToken('$S{userAt} $S{userRt}')
 					.expectStatus(200);
 			});
 

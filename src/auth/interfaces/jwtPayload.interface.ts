@@ -3,6 +3,6 @@ export interface JwtPayload {
 	sub: {
 		id: string;
 	};
-	iat: number;
 	isAdmin: boolean;
+	authSessionId: string;
 }

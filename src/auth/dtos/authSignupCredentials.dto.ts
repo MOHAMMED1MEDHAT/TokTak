@@ -1,10 +1,4 @@
-import {
-	IsEmail,
-	IsString,
-	Matches,
-	MaxLength,
-	MinLength,
-} from 'class-validator';
+import { IsEmail, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class AuthSignupCredentialsDto {
 	@IsEmail()
@@ -39,16 +33,5 @@ export class AuthSignupCredentialsDto {
 	password: string;
 
 	@IsString()
-	@MinLength(10, {
-		message:
-			'Password is too short. Minimal length is $constraint1 characters, but actual is $value',
-	})
-	@MaxLength(20, {
-		message:
-			'Password is too long. Maximal length is $constraint1 characters, but actual is $value',
-	})
-	@Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-		message: 'Password too weak',
-	})
 	confirmPassword: string;
 }
