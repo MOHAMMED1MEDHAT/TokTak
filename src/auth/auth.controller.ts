@@ -20,7 +20,13 @@ import {
 	PasswordResetDto,
 	VerificationAuthCodeDto,
 } from './dtos';
-import { FacebookOauthGuard, GoogleOauthGuard, JwtAuthGuard, RefreshJwtAuthGuard } from './guards';
+import {
+	FacebookOauthGuard,
+	GoogleOauthGuard,
+	JwtAuthGuard,
+	RefreshJwtAuthGuard,
+	TwitterOauthGuard,
+} from './guards';
 import {
 	JwtPayload,
 	LoginResponse,
@@ -58,6 +64,21 @@ export class AuthController {
 	@UseGuards(FacebookOauthGuard)
 	async facebookAuthCallback(@Req() req: Request): Promise<MessageResponse | LoginResponse | void> {
 		// console.log(req);
+		throw new NotImplementedException();
+		// return await this.authService.externalAuthentication(data);
+	}
+
+	@Get('twitter')
+	@UseGuards(TwitterOauthGuard)
+	async twitterAuth(@Req() req: Request): Promise<void> {
+		console.log(req);
+		throw new NotImplementedException();
+	}
+
+	@Get('twitter/callback')
+	@UseGuards(TwitterOauthGuard)
+	async twitterAuthCallback(@Req() req: Request): Promise<MessageResponse | LoginResponse | void> {
+		console.log(req);
 		throw new NotImplementedException();
 		// return await this.authService.externalAuthentication(data);
 	}
