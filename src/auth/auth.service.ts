@@ -1,3 +1,4 @@
+import { InjectRedis } from '@nestjs-modules/ioredis';
 import {
 	ConflictException,
 	HttpException,
@@ -7,6 +8,7 @@ import {
 	Logger,
 	NotAcceptableException,
 } from '@nestjs/common';
+import { Redis } from 'ioredis';
 import { EmailType } from 'src/mail/enums';
 import { MailService } from 'src/mail/mail.service';
 import { EmaiLDto } from 'src/user/dtos';
@@ -33,6 +35,7 @@ import { AuthRepository, AuthSessionRepository } from './repositories';
 export class AuthService {
 	private logger = new Logger('AuthService');
 	constructor(
+		@InjectRedis() private readonly redis: Redis,
 		private mailService: MailService,
 		private authRepository: AuthRepository,
 		private authSessionRepository: AuthSessionRepository,

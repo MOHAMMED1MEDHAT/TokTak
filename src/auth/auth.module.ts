@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisService } from 'src/redis/redis.service';
 import { MailService } from '../mail/mail.service';
 import { UserEntity } from '../user/entities';
 import { UserRepository } from '../user/repositories';
@@ -25,6 +26,7 @@ import {
 	],
 	controllers: [AuthController],
 	providers: [
+		RedisService,
 		AuthRepository,
 		AuthSessionRepository,
 		UserRepository,

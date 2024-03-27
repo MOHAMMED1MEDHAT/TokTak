@@ -1,11 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from '@superfaceai/passport-twitter-oauth2';
+import { Profile } from 'passport';
+import { RedisService } from 'src/redis/redis.service';
 import { OauthScopeData } from '../interfaces';
 
 @Injectable()
 export class TwitterStrategy extends PassportStrategy(Strategy, 'twitter') {
-	constructor() {
+	constructor(private readonly redisService: RedisService) {
 		super({
 			clientID: process.env.TWITTER_CLIENT_ID,
 			clientSecret: process.env.TWITTER_CLIENT_SECRET,
@@ -17,7 +19,7 @@ export class TwitterStrategy extends PassportStrategy(Strategy, 'twitter') {
 	async validate(
 		_accessToken: string,
 		_refreshToken: string,
-		profile: any,
+		profile: Profile,
 		done: (err: any, user: any, info?: any) => void,
 	): Promise<any> {
 		console.log('profile', profile);
