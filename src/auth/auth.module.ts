@@ -1,13 +1,20 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { RedisService } from 'src/redis/redis.service';
 import { MailService } from '../mail/mail.service';
 import { UserEntity } from '../user/entities';
 import { UserRepository } from '../user/repositories';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthRepository, AuthSessionRepository } from './repositories';
-import { FacebookStrategy, GoogleStrategy, JwtStrategy, RefreshJwtStrategy } from './strategies';
+import {
+	FacebookStrategy,
+	GoogleStrategy,
+	JwtStrategy,
+	RefreshJwtStrategy,
+	TwitterStrategy,
+} from './strategies';
 
 @Module({
 	imports: [
@@ -19,6 +26,7 @@ import { FacebookStrategy, GoogleStrategy, JwtStrategy, RefreshJwtStrategy } fro
 	],
 	controllers: [AuthController],
 	providers: [
+		RedisService,
 		AuthRepository,
 		AuthSessionRepository,
 		UserRepository,
@@ -27,6 +35,7 @@ import { FacebookStrategy, GoogleStrategy, JwtStrategy, RefreshJwtStrategy } fro
 		RefreshJwtStrategy,
 		GoogleStrategy,
 		FacebookStrategy,
+		TwitterStrategy,
 		MailService,
 	],
 	exports: [JwtStrategy, RefreshJwtStrategy, GoogleStrategy, FacebookStrategy],
