@@ -10,8 +10,8 @@ import {
 	Req,
 	UseGuards,
 } from '@nestjs/common';
-import { EmaiLDto } from 'src/user/dtos';
 import { UserEntity } from '../user/entities';
+import { EmaiLDto } from './../user/dtos';
 import { AuthService } from './auth.service';
 import { GetOauthScopeData, GetPayload, GetUser } from './decorators';
 import {
@@ -33,6 +33,7 @@ import {
 	MessageResponse,
 	OauthScopeData,
 	RefreshTokenResponse,
+	ResetPasswordTokenResponse,
 } from './interfaces';
 
 @Controller('auth')
@@ -130,7 +131,7 @@ export class AuthController {
 	@Post('verifyResetCode')
 	async verifyResetCode(
 		@Body() verificationAuthCodeDto: VerificationAuthCodeDto,
-	): Promise<MessageResponse> {
+	): Promise<ResetPasswordTokenResponse> {
 		return await this.authService.verifyResetCode(verificationAuthCodeDto);
 	}
 

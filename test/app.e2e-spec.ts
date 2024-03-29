@@ -112,15 +112,11 @@ describe('app e2e', () => {
 			});
 
 			it('should FAIL signup because of the user already exists', () => {
-				return pactum
-					.spec()
-					.post('/auth/signup')
-					.withBody(validAuthSignupDto)
-					.expectBody({
-						error: 'Conflict',
-						message: 'User already exists',
-						statusCode: 409,
-					});
+				return pactum.spec().post('/auth/signup').withBody(validAuthSignupDto).expectBody({
+					error: 'Conflict',
+					message: 'User already exists',
+					statusCode: 409,
+				});
 			});
 		});
 
