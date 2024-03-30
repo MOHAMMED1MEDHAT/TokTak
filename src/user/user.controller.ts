@@ -8,11 +8,10 @@ import {
 	Post,
 	UseGuards,
 } from '@nestjs/common';
-import { GetUser } from 'src/auth/decorators';
-import { JwtAuthGuard } from 'src/auth/guards';
-import { MessageResponse } from 'src/auth/interfaces';
-import { EmaiLDto } from './dtos';
-import { VerificationCodeDto } from './dtos/verification.dto';
+import { GetUser } from './../auth/decorators';
+import { JwtAuthGuard } from './../auth/guards';
+import { MessageResponse } from './../auth/interfaces';
+import { EmaiLDto, VerificationCodeDto } from './dtos';
 import { UserEntity } from './entities';
 import { UserService } from './user.service';
 
@@ -22,7 +21,7 @@ export class UserController {
 	constructor(private userService: UserService) {}
 
 	@HttpCode(HttpStatus.OK)
-	@Get('changeEmail')
+	@Get('changeEmailRequest')
 	async changeEmail(@GetUser() user: UserEntity): Promise<MessageResponse> {
 		return await this.userService.changeEmail(user);
 	}

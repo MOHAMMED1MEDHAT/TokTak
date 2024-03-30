@@ -9,11 +9,11 @@ import {
 	NotAcceptableException,
 } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { EmailType } from 'src/mail/enums';
-import { MailService } from 'src/mail/mail.service';
-import { EmaiLDto } from 'src/user/dtos';
-import { UserRepository } from 'src/user/repositories';
-import { UserEntity } from '../user/entities/user.entity';
+import { UserEntity } from '../user/entities';
+import { EmailType } from './../mail/enums';
+import { MailService } from './../mail/mail.service';
+import { EmaiLDto } from './../user/dtos';
+import { UserRepository } from './../user/repositories';
 import {
 	AuthLoginCredentialsDto,
 	AuthSignupCredentialsDto,
@@ -28,6 +28,7 @@ import {
 	MessageResponse,
 	OauthScopeData,
 	RefreshTokenResponse,
+	VerificationTokenResponse,
 } from './interfaces';
 import { AuthRepository, AuthSessionRepository } from './repositories';
 
@@ -107,13 +108,13 @@ export class AuthService {
 		//2) create authentication tokens for user
 		const accessToken = await this.authRepository.generateToken(
 			user.id,
-			session.id,
 			TokenType.ACCESS_TOKEN,
+			session.id,
 		);
 		const refreshToken = await this.authRepository.generateToken(
 			user.id,
-			session.id,
 			TokenType.REFRESH_TOKEN,
+			session.id,
 		);
 		//3) add the refreshToken to the authSession
 		await this.authSessionRepository.addAttribute(
@@ -145,13 +146,13 @@ export class AuthService {
 		//3) create authentication tokens for user
 		const accessToken = await this.authRepository.generateToken(
 			user.id,
-			session.id,
 			TokenType.ACCESS_TOKEN,
+			session.id,
 		);
 		const refreshToken = await this.authRepository.generateToken(
 			user.id,
-			session.id,
 			TokenType.REFRESH_TOKEN,
+			session.id,
 		);
 		//4) add the refreshToken to the authSession
 		await this.authSessionRepository.addAttribute(
@@ -176,12 +177,12 @@ export class AuthService {
 
 		const accessToken = await this.authRepository.generateToken(
 			userId,
+			TokenType.ACCESS_TOKEN,
 			(
 				await this.authSessionRepository.findOneBy({
 					id: refreshTokenPayload.authSessionId,
 				})
 			).id,
-			TokenType.ACCESS_TOKEN,
 		);
 
 		return {
@@ -221,7 +222,7 @@ export class AuthService {
 
 	async verifyResetCode(
 		verificationAuthCodeDto: VerificationAuthCodeDto,
-	): Promise<MessageResponse> {
+	): Promise<VerificationTokenResponse> {
 		const { code, email } = verificationAuthCodeDto;
 		const user = await this.userRepository.getUserByEmail(email);
 		const result = await this.authRepository.verifyResetPasswordCode(code, user.id);
@@ -229,17 +230,22 @@ export class AuthService {
 		if (!result) {
 			throw new NotAcceptableException('Invalid Reset code');
 		}
-		return { message: 'Code verified successfully' };
+
+		const token = await this.authRepository.generateToken(user.id, TokenType.PASSWORD_RESET_TOKEN);
+
+		return { message: 'Code verified successfully', token };
 	}
 
 	async resetPassword(passwordResetDto: PasswordResetDto): Promise<MessageResponse> {
-		const { email, password, confirmPassword } = passwordResetDto;
+		const { token, password, confirmPassword } = passwordResetDto;
 
 		if (password !== confirmPassword) {
 			throw new NotAcceptableException('Passwords do not match');
 		}
 
-		const user = await this.userRepository.getUserByEmail(email);
+		const user = await this.userRepository.getUserByEmail(
+			(await this.authRepository.getPayload(token)).email,
+		);
 
 		const result = await this.authRepository.changePassword(user, password);
 
