@@ -21,7 +21,7 @@ export class UserController {
 	constructor(private userService: UserService) {}
 
 	@HttpCode(HttpStatus.OK)
-	@Get('changeEmail')
+	@Get('changeEmailRequest')
 	async changeEmail(@GetUser() user: UserEntity): Promise<MessageResponse> {
 		return await this.userService.changeEmail(user);
 	}
