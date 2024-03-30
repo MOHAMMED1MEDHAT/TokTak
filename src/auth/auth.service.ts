@@ -28,7 +28,7 @@ import {
 	MessageResponse,
 	OauthScopeData,
 	RefreshTokenResponse,
-	ResetPasswordTokenResponse,
+	VerificationTokenResponse,
 } from './interfaces';
 import { AuthRepository, AuthSessionRepository } from './repositories';
 
@@ -222,7 +222,7 @@ export class AuthService {
 
 	async verifyResetCode(
 		verificationAuthCodeDto: VerificationAuthCodeDto,
-	): Promise<ResetPasswordTokenResponse> {
+	): Promise<VerificationTokenResponse> {
 		const { code, email } = verificationAuthCodeDto;
 		const user = await this.userRepository.getUserByEmail(email);
 		const result = await this.authRepository.verifyResetPasswordCode(code, user.id);
@@ -237,13 +237,15 @@ export class AuthService {
 	}
 
 	async resetPassword(passwordResetDto: PasswordResetDto): Promise<MessageResponse> {
-		const { email, password, confirmPassword } = passwordResetDto;
+		const { token, password, confirmPassword } = passwordResetDto;
 
 		if (password !== confirmPassword) {
 			throw new NotAcceptableException('Passwords do not match');
 		}
 
-		const user = await this.userRepository.getUserByEmail(email);
+		const user = await this.userRepository.getUserByEmail(
+			(await this.authRepository.getPayload(token)).email,
+		);
 
 		const result = await this.authRepository.changePassword(user, password);
 

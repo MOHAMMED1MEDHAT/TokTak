@@ -10,6 +10,7 @@ import {
 	Req,
 	UseGuards,
 } from '@nestjs/common';
+import { ApiBadGatewayResponse } from '@nestjs/swagger';
 import { UserEntity } from '../user/entities';
 import { EmaiLDto } from './../user/dtos';
 import { AuthService } from './auth.service';
@@ -33,7 +34,7 @@ import {
 	MessageResponse,
 	OauthScopeData,
 	RefreshTokenResponse,
-	ResetPasswordTokenResponse,
+	VerificationTokenResponse,
 } from './interfaces';
 
 @Controller('auth')
@@ -42,6 +43,7 @@ export class AuthController {
 
 	constructor(private authService: AuthService) {}
 
+	@ApiBadGatewayResponse({ description: 'Bad Gateway' })
 	@Get('google')
 	@UseGuards(GoogleOauthGuard)
 	async googleAuth(): Promise<void> {}
@@ -57,14 +59,14 @@ export class AuthController {
 	@Get('facebook')
 	@UseGuards(FacebookOauthGuard)
 	async facebookAuth(@Req() req: Request): Promise<void> {
-		// console.log(req);
+		console.log(req);
 		throw new NotImplementedException();
 	}
 
 	@Get('facebook/callback')
 	@UseGuards(FacebookOauthGuard)
 	async facebookAuthCallback(@Req() req: Request): Promise<MessageResponse | LoginResponse | void> {
-		// console.log(req);
+		console.log(req);
 		throw new NotImplementedException();
 		// return await this.authService.externalAuthentication(data);
 	}
@@ -122,7 +124,7 @@ export class AuthController {
 	}
 
 	@HttpCode(HttpStatus.OK)
-	@Post('forgotPassword')
+	@Post('forgetPassword')
 	async forgotPassword(@Body() emailDto: EmaiLDto): Promise<MessageResponse> {
 		return await this.authService.forgotPassword(emailDto);
 	}
@@ -131,7 +133,7 @@ export class AuthController {
 	@Post('verifyResetCode')
 	async verifyResetCode(
 		@Body() verificationAuthCodeDto: VerificationAuthCodeDto,
-	): Promise<ResetPasswordTokenResponse> {
+	): Promise<VerificationTokenResponse> {
 		return await this.authService.verifyResetCode(verificationAuthCodeDto);
 	}
 

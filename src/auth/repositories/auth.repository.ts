@@ -30,12 +30,15 @@ export class AuthRepository extends Repository<UserEntity> {
 	async generateToken(userId: string, tokenType: TokenType, sessionId?: string): Promise<string> {
 		const user = await this.findOne({ where: { id: userId } });
 
+		const payload: JwtPayload = {
+			email: user.email,
+			sub: { id: user.id },
+			isAdmin: user.isAdmin,
+			authSessionId: sessionId || null,
+		};
+
 		switch (tokenType) {
 			case TokenType.PASSWORD_RESET_TOKEN: {
-				const payload = {
-					email: user.email,
-				};
-
 				return this.jwtService.sign(payload, {
 					expiresIn: process.env.JWT_PASSWORD_RESET_EXPIRES_IN,
 					secret: process.env.JWT_PASSWORD_RESET_SECRET,
@@ -43,13 +46,6 @@ export class AuthRepository extends Repository<UserEntity> {
 			}
 
 			case TokenType.ACCESS_TOKEN: {
-				const payload: JwtPayload = {
-					email: user.email,
-					sub: { id: user.id },
-					isAdmin: user.isAdmin,
-					authSessionId: sessionId,
-				};
-
 				return this.jwtService.sign(payload, {
 					expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
 					secret: process.env.JWT_ACCESS_SECRET,
@@ -57,13 +53,6 @@ export class AuthRepository extends Repository<UserEntity> {
 			}
 
 			case TokenType.REFRESH_TOKEN: {
-				const payload: JwtPayload = {
-					email: user.email,
-					sub: { id: user.id },
-					isAdmin: user.isAdmin,
-					authSessionId: sessionId,
-				};
-
 				return this.jwtService.sign(payload, {
 					expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
 					secret: process.env.JWT_REFRESH_SECRET,
@@ -73,6 +62,14 @@ export class AuthRepository extends Repository<UserEntity> {
 	}
 
 	async getPayload(token: string): Promise<JwtPayload> {
+		const valid = await this.jwtService.verify(token, {
+			secret: process.env.JWT_PASSWORD_RESET_SECRET,
+		});
+
+		if (!valid) {
+			throw new Error('Invalid token');
+		}
+
 		return await this.jwtService.decode(token);
 	}
 
