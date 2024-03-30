@@ -1,7 +1,7 @@
 import { Injectable, NotAcceptableException } from '@nestjs/common';
-import { MessageResponse } from 'src/auth/interfaces';
-import { EmailType } from 'src/mail/enums';
-import { MailService } from 'src/mail/mail.service';
+import { MessageResponse } from './../auth/interfaces';
+import { EmailType } from './../mail/enums';
+import { MailService } from './../mail/mail.service';
 import { EmaiLDto } from './dtos';
 import { VerificationCodeDto } from './dtos/verification.dto';
 import { UserEntity } from './entities';

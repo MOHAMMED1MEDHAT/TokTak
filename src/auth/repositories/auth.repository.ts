@@ -27,34 +27,49 @@ export class AuthRepository extends Repository<UserEntity> {
 		return null;
 	}
 
-	async generateToken(userId: string, sessionId: string, tokenType: TokenType): Promise<string> {
-		this.logger.log('generateAccessToken');
+	async generateToken(userId: string, tokenType: TokenType, sessionId?: string): Promise<string> {
 		const user = await this.findOne({ where: { id: userId } });
-
-		if (tokenType == TokenType.PASSWORD_RESET_TOKEN) {
-			//TODO: handle reset password use case
-		}
 
 		const payload: JwtPayload = {
 			email: user.email,
 			sub: { id: user.id },
 			isAdmin: user.isAdmin,
-			authSessionId: sessionId,
+			authSessionId: sessionId || null,
 		};
 
-		return this.jwtService.sign(payload, {
-			expiresIn:
-				tokenType == TokenType.ACCESS_TOKEN
-					? process.env.JWT_ACCESS_EXPIRES_IN
-					: process.env.JWT_REFRESH_EXPIRES_IN,
-			secret:
-				tokenType == TokenType.ACCESS_TOKEN
-					? process.env.JWT_ACCESS_SECRET
-					: process.env.JWT_REFRESH_SECRET,
-		});
+		switch (tokenType) {
+			case TokenType.PASSWORD_RESET_TOKEN: {
+				return this.jwtService.sign(payload, {
+					expiresIn: process.env.JWT_PASSWORD_RESET_EXPIRES_IN,
+					secret: process.env.JWT_PASSWORD_RESET_SECRET,
+				});
+			}
+
+			case TokenType.ACCESS_TOKEN: {
+				return this.jwtService.sign(payload, {
+					expiresIn: process.env.JWT_ACCESS_EXPIRES_IN,
+					secret: process.env.JWT_ACCESS_SECRET,
+				});
+			}
+
+			case TokenType.REFRESH_TOKEN: {
+				return this.jwtService.sign(payload, {
+					expiresIn: process.env.JWT_REFRESH_EXPIRES_IN,
+					secret: process.env.JWT_REFRESH_SECRET,
+				});
+			}
+		}
 	}
 
 	async getPayload(token: string): Promise<JwtPayload> {
+		const valid = await this.jwtService.verify(token, {
+			secret: process.env.JWT_PASSWORD_RESET_SECRET,
+		});
+
+		if (!valid) {
+			throw new Error('Invalid token');
+		}
+
 		return await this.jwtService.decode(token);
 	}
 
