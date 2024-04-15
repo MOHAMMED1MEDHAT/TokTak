@@ -155,7 +155,7 @@ export class UserEntity extends BaseEntity {
 	@DeleteDateColumn()
 	deletedAt: Date;
 
-	// @BeforeInsert()
+	//// @BeforeInsert()
 	// async hashPassword(): Promise<void> {
 	// 	this.password = await argon.hash(this.password);
 	// }
