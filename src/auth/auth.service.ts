@@ -57,6 +57,8 @@ export class AuthService {
 		user.firstName = firstName;
 		user.lastName = lastName;
 		user.passwordHash = await this.authRepository.hashPassword(password);
+		const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
+		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
 
 		try {
 			await this.userRepository.createNewUser(user);
@@ -70,8 +72,8 @@ export class AuthService {
 			}
 		}
 
-		const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
-		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
+		// const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
+		// await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
 
 		return {
 			message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
