@@ -1,15 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { UserEntity } from '../../user/schemas';
 import { JwtPayload } from '../interfaces';
 import { AuthRepository } from '../repositories';
-import { UserEntity } from './../../user/entities';
 
 @Injectable()
-export class RefreshJwtStrategy extends PassportStrategy(
-	Strategy,
-	'jwt-refresh',
-) {
+export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
 	constructor(private authRepository: AuthRepository) {
 		super({
 			jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
@@ -18,9 +15,7 @@ export class RefreshJwtStrategy extends PassportStrategy(
 		});
 	}
 
-	async validate(
-		payload: JwtPayload,
-	): Promise<{ user: UserEntity; payload: JwtPayload }> {
+	async validate(payload: JwtPayload): Promise<{ user: UserEntity; payload: JwtPayload }> {
 		const { email } = payload;
 		const user = await this.authRepository.findOne({
 			where: {

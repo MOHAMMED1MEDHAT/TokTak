@@ -9,7 +9,7 @@ import {
 	NotAcceptableException,
 } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { UserEntity } from '../user/entities';
+import { UserEntity } from '../user/schemas';
 import { EmailType } from './../mail/enums';
 import { MailService } from './../mail/mail.service';
 import { EmaiLDto } from './../user/dtos';

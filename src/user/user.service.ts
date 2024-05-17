@@ -4,8 +4,8 @@ import { EmailType } from './../mail/enums';
 import { MailService } from './../mail/mail.service';
 import { EmaiLDto } from './dtos';
 import { VerificationCodeDto } from './dtos/verification.dto';
-import { UserEntity } from './entities';
 import { UserRepository } from './repositories';
+import { UserEntity } from './schemas';
 
 @Injectable()
 export class UserService {
