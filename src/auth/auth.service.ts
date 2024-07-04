@@ -57,6 +57,7 @@ export class AuthService {
 		user.firstName = firstName;
 		user.lastName = lastName;
 		user.passwordHash = await this.authRepository.hashPassword(password);
+		this.logger.debug(`user id is ${user.id}`)
 		const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
 		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
 
