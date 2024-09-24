@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as argon from 'argon2';
 import { DataSource, Repository } from 'typeorm';
-import { UserEntity } from '../../user/entities/user.entity';
+import { UserEntity } from '../../user/schemas/user.entity';
 import { TokenType } from '../enums/tokenType.enum';
 import { JwtPayload } from '../interfaces/jwtPayload.interface';
 

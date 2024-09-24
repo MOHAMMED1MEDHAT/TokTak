@@ -9,9 +9,9 @@ import {
 	NotAcceptableException,
 } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { UserEntity } from '../user/entities';
-import { EmailType } from './../mail/enums';
-import { MailService } from './../mail/mail.service';
+import { EmailType } from 'src/libs/mail/enums';
+import { MailService } from 'src/libs/mail/mail.service';
+import { UserEntity } from '../user/schemas';
 import { EmaiLDto } from './../user/dtos';
 import { UserRepository } from './../user/repositories';
 import {

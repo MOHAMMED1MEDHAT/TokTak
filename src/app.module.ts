@@ -2,11 +2,11 @@ import { Module } from '@nestjs/common';
 
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { ConfigsModule } from './config/config.module';
-import { typeOrmConfig } from './config/typeorm.config';
-import { MailModule } from './mail/mail.module';
-import { UserModule } from './user/user.module';
+import { ConfigsModule } from './configs/config.module';
+import { typeOrmConfig } from './configs/typeorm.config';
+import { MailModule } from './libs/mail/mail.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
 	imports: [
