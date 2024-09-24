@@ -1,6 +1,6 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
-import { UserEntity } from '../user/schemas';
+import { UserEntity } from 'src/modules/user/schemas';
 import { EmailType } from './enums';
 import { EmailData, EmailUpdateData, ResetPasswordEmailData, VerifyEmailData } from './interfaces';
 

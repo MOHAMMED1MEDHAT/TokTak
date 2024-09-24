@@ -1,7 +1,7 @@
 import { Injectable, NotAcceptableException } from '@nestjs/common';
-import { MessageResponse } from '../modules/auth/auth/interfaces';
-import { EmailType } from './../mail/enums';
-import { MailService } from './../mail/mail.service';
+import { EmailType } from 'src/libs/mail/enums';
+import { MailService } from 'src/libs/mail/mail.service';
+import { MessageResponse } from '../auth/interfaces';
 import { EmaiLDto } from './dtos';
 import { VerificationCodeDto } from './dtos/verification.dto';
 import { UserRepository } from './repositories';
@@ -20,9 +20,7 @@ export class UserService {
 		// Send email with code
 		await this.mailService.sendMail(user, EmailType.EMAIL_UPDATE, code);
 
-		return {
-			message: `we sent you a confirmation code in your email:${user.email}`,
-		};
+		return { message: `we sent you a confirmation code in your email:${user.email}` };
 	}
 
 	async verifyEmailUpdateCode(
@@ -42,10 +40,7 @@ export class UserService {
 		return this.userRepository.updateEmail(email, user.id);
 	}
 
-	async changeProfileImage(
-		userId: string,
-		profileImage: string,
-	): Promise<void> {
+	async changeProfileImage(userId: string, profileImage: string): Promise<void> {
 		return this.userRepository.updateProfileImage(userId, profileImage);
 	}
 }

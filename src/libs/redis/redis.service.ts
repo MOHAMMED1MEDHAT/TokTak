@@ -1,7 +1,7 @@
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { TokenType } from './../auth/enums';
+import { TokenType } from '../../modules/auth/enums';
 
 @Injectable()
 export class RedisService {

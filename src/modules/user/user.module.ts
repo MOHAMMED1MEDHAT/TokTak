@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { MailService } from './../mail/mail.service';
+import { MailService } from 'src/libs/mail/mail.service';
 import { UserRepository } from './repositories';
 import { UserEntity } from './schemas';
 import { UserController } from './user.controller';

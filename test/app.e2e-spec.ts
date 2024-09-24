@@ -1,7 +1,7 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as pactum from 'pactum';
-import { AuthSignupCredentialsDto } from 'src/auth/dtos';
+import { AuthSignupCredentialsDto } from 'src/modules/auth/dtos';
 import { UserEntity } from '../src/user/schemas/user.entity';
 import { AppModule } from './../src/app.module';
 
