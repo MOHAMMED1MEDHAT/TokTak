@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from '@superfaceai/passport-twitter-oauth2';
 import { Profile } from 'passport';
+import { RedisService } from '../../../libs/redis/redis.service';
 import { OauthScopeData } from '../interfaces';
-import { RedisService } from './../../redis/redis.service';
 
 @Injectable()
 export class TwitterStrategy extends PassportStrategy(Strategy, 'twitter') {

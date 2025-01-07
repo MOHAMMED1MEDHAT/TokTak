@@ -11,7 +11,7 @@ import {
 	UseGuards,
 } from '@nestjs/common';
 import { ApiBadGatewayResponse } from '@nestjs/swagger';
-import { UserEntity } from '../user/entities';
+import { UserEntity } from '../user/schemas';
 import { EmaiLDto } from './../user/dtos';
 import { AuthService } from './auth.service';
 import { GetOauthScopeData, GetPayload, GetUser } from './decorators';

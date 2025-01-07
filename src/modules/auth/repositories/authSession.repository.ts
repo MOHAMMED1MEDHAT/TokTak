@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
+import { UserEntity } from '../../user/schemas';
 import { AuthSessionEntity } from '../entities';
 import { AuthSessionAttribute, AuthSessionStatus } from '../enums';
-import { UserEntity } from './../../user/entities';
 
 @Injectable()
 export class AuthSessionRepository extends Repository<AuthSessionEntity> {

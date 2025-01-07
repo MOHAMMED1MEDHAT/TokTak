@@ -12,7 +12,7 @@ import { GetUser } from './../auth/decorators';
 import { JwtAuthGuard } from './../auth/guards';
 import { MessageResponse } from './../auth/interfaces';
 import { EmaiLDto, VerificationCodeDto } from './dtos';
-import { UserEntity } from './entities';
+import { UserEntity } from './schemas';
 import { UserService } from './user.service';
 
 @Controller('users')

@@ -9,9 +9,9 @@ import {
 	NotAcceptableException,
 } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { UserEntity } from '../user/entities';
-import { EmailType } from './../mail/enums';
-import { MailService } from './../mail/mail.service';
+import { EmailType } from 'src/libs/mail/enums';
+import { MailService } from 'src/libs/mail/mail.service';
+import { UserEntity } from '../user/schemas';
 import { EmaiLDto } from './../user/dtos';
 import { UserRepository } from './../user/repositories';
 import {
@@ -43,9 +43,12 @@ export class AuthService {
 		private userRepository: UserRepository,
 	) {}
 
-	async signUp(authSignupCredentialsDto: AuthSignupCredentialsDto): Promise<MessageResponse> {
+	async signUp(
+		authSignupCredentialsDto: AuthSignupCredentialsDto,
+	): Promise<MessageResponse> {
 		// this.logger.log('signUp');
-		const { email, firstName, lastName, confirmPassword, password } = authSignupCredentialsDto;
+		const { email, firstName, lastName, confirmPassword, password } =
+			authSignupCredentialsDto;
 
 		if (password !== confirmPassword) {
 			// this.logger.error('Passwords do not match');
@@ -57,9 +60,14 @@ export class AuthService {
 		user.firstName = firstName;
 		user.lastName = lastName;
 		user.passwordHash = await this.authRepository.hashPassword(password);
-		this.logger.debug(`user id is ${JSON.stringify(user)}`)
-		const mailVerificationCode = await this.userRepository.generateEmailCode(user.id);
-		await this.mailService.sendMail(user, EmailType.USER_CONFIRMATION, mailVerificationCode);
+		const mailVerificationCode = await this.userRepository.generateEmailCode(
+			user.id,
+		);
+		await this.mailService.sendMail(
+			user,
+			EmailType.USER_CONFIRMATION,
+			mailVerificationCode,
+		);
 
 		try {
 			await this.userRepository.createNewUser(user);
@@ -96,8 +104,14 @@ export class AuthService {
 
 			await this.userRepository.createNewUser(newUser);
 
-			const mailVerificationCode = await this.userRepository.generateEmailCode(newUser.id);
-			await this.mailService.sendMail(newUser, EmailType.USER_CONFIRMATION, mailVerificationCode);
+			const mailVerificationCode = await this.userRepository.generateEmailCode(
+				newUser.id,
+			);
+			await this.mailService.sendMail(
+				newUser,
+				EmailType.USER_CONFIRMATION,
+				mailVerificationCode,
+			);
 
 			return {
 				message: `Please verify your email, We sent you a verification code in your mail: ${user.email}`,
@@ -172,9 +186,12 @@ export class AuthService {
 	}
 
 	async refresh(userId: string): Promise<RefreshTokenResponse> {
-		const refreshToken = (await this.authSessionRepository.findOneBy({ userId })).refreshToken;
+		const refreshToken = (
+			await this.authSessionRepository.findOneBy({ userId })
+		).refreshToken;
 
-		const refreshTokenPayload = await this.authRepository.getPayload(refreshToken);
+		const refreshTokenPayload =
+			await this.authRepository.getPayload(refreshToken);
 
 		this.logger.verbose(`refreshTokenPayload ${refreshTokenPayload}`);
 
@@ -194,7 +211,10 @@ export class AuthService {
 		};
 	}
 
-	async logout(user: UserEntity, payload: JwtPayload): Promise<MessageResponse> {
+	async logout(
+		user: UserEntity,
+		payload: JwtPayload,
+	): Promise<MessageResponse> {
 		this.logger.log('logout');
 		await this.authSessionRepository.invalidateSession(payload.authSessionId);
 		this.logger.log(`User ${user.email} has been logged out`);
@@ -202,12 +222,17 @@ export class AuthService {
 		return { message: 'User logged out successfully' };
 	}
 
-	async verifyUserEmail(verificationCodeDto: VerificationAuthCodeDto): Promise<MessageResponse> {
+	async verifyUserEmail(
+		verificationCodeDto: VerificationAuthCodeDto,
+	): Promise<MessageResponse> {
 		const { code, email } = verificationCodeDto;
 		const userId = (await this.userRepository.getUserByEmail(email)).id;
 		const user = await this.userRepository.verifyEmailCode(code, userId);
 		if (!user) {
-			throw new HttpException('Invalid verification code', HttpStatus.NOT_ACCEPTABLE);
+			throw new HttpException(
+				'Invalid verification code',
+				HttpStatus.NOT_ACCEPTABLE,
+			);
 		}
 		return { message: 'Email verified successfully' };
 	}
@@ -228,18 +253,26 @@ export class AuthService {
 	): Promise<VerificationTokenResponse> {
 		const { code, email } = verificationAuthCodeDto;
 		const user = await this.userRepository.getUserByEmail(email);
-		const result = await this.authRepository.verifyResetPasswordCode(code, user.id);
+		const result = await this.authRepository.verifyResetPasswordCode(
+			code,
+			user.id,
+		);
 
 		if (!result) {
 			throw new NotAcceptableException('Invalid Reset code');
 		}
 
-		const token = await this.authRepository.generateToken(user.id, TokenType.PASSWORD_RESET_TOKEN);
+		const token = await this.authRepository.generateToken(
+			user.id,
+			TokenType.PASSWORD_RESET_TOKEN,
+		);
 
 		return { message: 'Code verified successfully', token };
 	}
 
-	async resetPassword(passwordResetDto: PasswordResetDto): Promise<MessageResponse> {
+	async resetPassword(
+		passwordResetDto: PasswordResetDto,
+	): Promise<MessageResponse> {
 		const { token, password, confirmPassword } = passwordResetDto;
 
 		if (password !== confirmPassword) {

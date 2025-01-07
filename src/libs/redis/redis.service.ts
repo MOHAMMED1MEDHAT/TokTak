@@ -1,7 +1,7 @@
 import { InjectRedis } from '@nestjs-modules/ioredis';
 import { Injectable } from '@nestjs/common';
 import { Redis } from 'ioredis';
-import { TokenType } from './../auth/enums';
+import { TokenType } from '../../modules/auth/enums';
 
 @Injectable()
 export class RedisService {
@@ -14,7 +14,11 @@ export class RedisService {
 		}
 	}
 
-	async setWithExpiration(key: string, value: string, expiration: number): Promise<void> {
+	async setWithExpiration(
+		key: string,
+		value: string,
+		expiration: number,
+	): Promise<void> {
 		const val = await this.redis.set(key, value, 'EX', expiration);
 		if (!val) {
 			throw new Error('Failed to set value in redis');
