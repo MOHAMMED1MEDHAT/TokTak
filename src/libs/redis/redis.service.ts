@@ -14,7 +14,11 @@ export class RedisService {
 		}
 	}
 
-	async setWithExpiration(key: string, value: string, expiration: number): Promise<void> {
+	async setWithExpiration(
+		key: string,
+		value: string,
+		expiration: number,
+	): Promise<void> {
 		const val = await this.redis.set(key, value, 'EX', expiration);
 		if (!val) {
 			throw new Error('Failed to set value in redis');

@@ -2,14 +2,23 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { UserEntity } from 'src/modules/user/schemas';
 import { EmailType } from './enums';
-import { EmailData, EmailUpdateData, ResetPasswordEmailData, VerifyEmailData } from './interfaces';
+import {
+	EmailData,
+	EmailUpdateData,
+	ResetPasswordEmailData,
+	VerifyEmailData,
+} from './interfaces';
 
 @Injectable()
 export class MailService {
 	private readonly logger = new Logger(MailService.name);
 	constructor(private mailerService: MailerService) {}
 
-	async sendMail(user: UserEntity, mailType: EmailType, code?: string): Promise<void> {
+	async sendMail(
+		user: UserEntity,
+		mailType: EmailType,
+		code?: string,
+	): Promise<void> {
 		switch (mailType) {
 			case EmailType.USER_CONFIRMATION:
 				await this.sendUserConfirmation(user, code);
@@ -32,7 +41,10 @@ export class MailService {
 		}
 	}
 
-	private async sendUserConfirmation(user: UserEntity, code: string): Promise<void> {
+	private async sendUserConfirmation(
+		user: UserEntity,
+		code: string,
+	): Promise<void> {
 		const data: VerifyEmailData = {
 			name: user.firstName,
 			verificationCode: code,
@@ -49,7 +61,10 @@ export class MailService {
 		});
 	}
 
-	private async sendPasswordReset(user: UserEntity, code: string): Promise<void> {
+	private async sendPasswordReset(
+		user: UserEntity,
+		code: string,
+	): Promise<void> {
 		const data: ResetPasswordEmailData = {
 			name: user.firstName,
 			resetPasswordCode: code,

@@ -20,7 +20,9 @@ export class UserService {
 		// Send email with code
 		await this.mailService.sendMail(user, EmailType.EMAIL_UPDATE, code);
 
-		return { message: `we sent you a confirmation code in your email:${user.email}` };
+		return {
+			message: `we sent you a confirmation code in your email:${user.email}`,
+		};
 	}
 
 	async verifyEmailUpdateCode(
@@ -40,7 +42,10 @@ export class UserService {
 		return this.userRepository.updateEmail(email, user.id);
 	}
 
-	async changeProfileImage(userId: string, profileImage: string): Promise<void> {
+	async changeProfileImage(
+		userId: string,
+		profileImage: string,
+	): Promise<void> {
 		return this.userRepository.updateProfileImage(userId, profileImage);
 	}
 }
